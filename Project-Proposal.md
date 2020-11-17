@@ -16,18 +16,34 @@ Jiying Han, Liucheng Shi, Yatong feng, Zhe Chen, Wenhao Gou
 
 Box-office prediction model based on IMDB
 
+``` r
+library(tidyverse)
+imdb_raw = read_csv("movie_metadata.csv")
+imdb = read_csv("imdb_model_clean.csv")
+#imdb_raw %>% 
+  #group_by(country) %>% 
+  #summarize(n = n()) %>% 
+  #arrange(desc(n))
+```
+
 ## 3． Motivation
 
 Given the scenario of social distancing and temporary closure of movie
 theaters across the United States, Box-office prediction has never been
-such a cruical problem in the fim industry that profitability is
+such a crucial problem in the film industry that profitability is
 directly associated with strategy made by investors and producers.
 
-Through this report, we try to export the association between the
-box-office revenue and critical review, genre, budget, content rating,
-casting and director, ethnicity, and facebook likes. We hope this site
-would help you retrieve useful information and provide you a thorough
-understanding on key terms that tied with box office success.
+Our main goal is to:
+
+  - use skinny to explore the association between the box-office revenue
+    and other variables including critical review, genre, budget, and
+    content rating
+  - create word cloud, radar map on contributing factors
+  - generate linear regression model to predict box-office revenue
+
+We hope this site would help you retrieve useful information and provide
+you a thorough understanding on key terms that tied with box office
+success.
 
 ## 4． Intended final products
 
