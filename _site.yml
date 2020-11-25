@@ -1,0 +1,16 @@
+name: "Yay internet!"
+output_dir: "."
+navbar:
+  title: "P8015_IMDb"
+  right:
+    - text: "About page"
+      href: about.html
+    - text: "Plots"
+      href: plotly.html
+    - icon: fa-envelope fa-lg
+      href: mailto:dummy@cumc.columbia.edu
+    - icon: fa-github fa-lg
+      href: https://github.com/seriousbamboo/p8105_IMDb.github.io
+output:
+  html_document:
+    theme: darkly

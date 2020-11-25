@@ -1,0 +1,32 @@
+---
+title: "P8105_IMDb"
+output: 
+  html_document:
+    toc: true
+    toc_float: true
+---
+<html>  
+    <head>  
+        <meta charset="UTF-8">
+    </head>  
+    <script type="text/javascript">  
+        function disptime(){  
+            var today=new Date();  
+            var hh=today.getHours();  
+            var mm=today.getMinutes();
+            var ss = today.getSeconds();
+            if(hh<10){hh = "0"+hh;}
+            if(mm<10){mm = "0"+mm;}
+            if(ss<10){ss = "0"+ss;}
+            document.getElementById("myclock").innerHTML="<h3>Time now: "+hh+":"+mm+":"+ss+"</h4>"  
+        }   
+        //setInterval
+        var mytime = setInterval("disptime()",1000);  
+    </script>  
+    <body onload="disptime()">  
+        <div id="myclock"></div>  
+    </body>  
+</html>
+
+# This part is the introdction
+

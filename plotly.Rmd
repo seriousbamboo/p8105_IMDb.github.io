@@ -1,0 +1,43 @@
+---
+title: "Dashboard"
+output: 
+  flexdashboard::flex_dashboard:
+    orientation: columns
+    vertical_layout: scroll
+    
+---
+
+```{r setup, include=FALSE}
+library(flexdashboard)
+library(tidyverse)
+#library(p8105.datasets)
+library(plotly)
+library(lubridate)
+
+```
+
+Column {data-width=600}
+-----------------------------------------------------------------------
+
+### Plot 1
+
+```{r}
+
+```
+
+
+Column {data-width=400}
+-----------------------------------------------------------------------
+
+### Plot 2
+
+```{r}
+
+```
+
+### Plot 3
+
+```{r}
+
+```
+
