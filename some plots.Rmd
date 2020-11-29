@@ -13,8 +13,37 @@ library(plotly)
 library(lubridate)
 
 ```
+Explore--
 
+find the association between director's facebook like and gross
+```{r}
+dataset = read.csv("./imdb_model_clean.csv") 
+dataset %>% 
+  filter(director_facebook_likes != 0 & director_facebook_likes < 2000 ) %>% 
+  ggplot(aes(x = director_facebook_likes, y = gross)) +
+  geom_point()
+
+dataset %>% 
+  filter(director_facebook_likes != 0 & 2000 < director_facebook_likes) %>% 
+  ggplot(aes(x = director_facebook_likes, y = gross, color =  )) +
+  geom_point() 
+ # from above two plots we can see that there is no direct association between director's facebook like and  movie's gross
+```
+
+the association between audience size and movie type
 ```{r}
 
+```
+
+the association between 
+```{r}
+
+```
+
+
+wordcloud
+```{r}
+
+  
 ```
 
