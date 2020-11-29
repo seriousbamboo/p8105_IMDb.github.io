@@ -1,0 +1,111 @@
+---
+title: "p8105_IMDB_Model"
+author: "Zhe Chen, Yatong Feng"
+date: "2020/11/10"
+output: github_document
+---
+
+### include libraries
+```{r, warning=FALSE}
+library(tidyverse)
+library(stringr)
+```
+
+### import data
+```{r, message=FALSE}
+imdb_raw = read_csv("./movie_metadata.csv")
+```
+
+```{r}
+imdb = imdb_raw %>%
+  as.data.frame() %>% 
+  drop_na(movie_title) %>%
+  select(
+    -color, -actor_2_name, -actor_2_facebook_likes, -actor_3_name, -actor_3_facebook_likes, -facenumber_in_poster, -movie_imdb_link, -content_rating, -plot_keywords
+  ) %>%
+  drop_na(gross)
+
+rownames(imdb) = c(1:dim(imdb)[1])
+```
+
+```{r}
+a = imdb$genres
+genres_list = unique(unlist(str_split(a, "[|]")))
+
+niubility = as.data.frame(matrix(0, nrow=dim(imdb)[1], ncol=length(genres_list)))
+colnames(niubility) = genres_list
+
+for (i in 1:dim(imdb)[1]){
+  b = unlist(str_split(imdb$genres[i], "[|]"))
+  for (word in b){
+    niubility[i, word] = 1
+    }
+  }
+
+rownames(niubility) = c(1:dim(imdb)[1])
+
+imdb_after_genre = data.frame(imdb, niubility)
+```
+
+```{r}
+imdb_model = 
+  imdb_after_genre %>% 
+  select(num_critic_for_reviews:gross, num_voted_users:num_user_for_reviews, budget, imdb_score: Film.Noir)
+
+lm = lm(gross ~., data = imdb_model)
+# summary(lm)
+
+imdb_model_clean = 
+  imdb_model %>% 
+  select(num_critic_for_reviews:num_user_for_reviews, imdb_score, Action:Fantasy, Romance:Family, Drama, Sport:Horror, Music)
+
+lm_clean = lm(gross ~., data = imdb_model_clean)
+plot(lm_clean)
+
+plot(lm_clean, which=4)
+Ci <- cooks.distance(lm_clean)
+labelpoint <- which(Ci>0.025) #verify the outliers
+# delate the outliers (cook distance greater than 0.025)
+imdb_model_clean=imdb_model_clean[-labelpoint,]
+# the modal and plot after delating the outliers
+lm6 <- lm(gross ~., data = imdb_model_clean)
+par(mfrow=c(2,2))
+for (i in 1:4) {
+  plot(lm6,which = i)
+}
+summary(imdb_model_clean)
+```
+
+```{r}
+write_csv(imdb_model_clean,"imdb_model_clean.csv")
+```
+
+
+```{r}
+str_model = imdb_model %>% janitor::clean_names() %>% drop_na()
+
+```
+
+```{r}
+genres_list = colnames(str_model)[13:length(colnames(str_model))][-22]
+for (genre in genres_list) {
+  assign(paste0(genre, "_model_df"), str_model %>% 
+           filter(get(genre) == 1) %>% 
+           select(num_critic_for_reviews:movie_facebook_likes))
+  
+  assign(paste0(genre, "_lm"), lm(gross ~., data = get(paste0(genre, "_model_df"))))
+}
+
+```
+
+```{r}
+
+get_lm <- function(genres){
+  summary(get(paste0(genres, "_lm")))
+}
+
+genres_list
+map(genres_list, get_lm)
+```
+
+
