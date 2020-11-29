@@ -1,0 +1,20 @@
+---
+title: "some plots we can use"
+author: "Jiying Han"
+date: "11/29/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+library(flexdashboard)
+library(tidyverse)
+#library(p8105.datasets)
+library(plotly)
+library(lubridate)
+
+```
+
+```{r}
+
+```
+

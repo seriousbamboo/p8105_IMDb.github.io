@@ -12,6 +12,15 @@ Our project aims to provide a "Handbook to movie producers"
 
 2020 is a really special year to us. Most industries are suffering great loss due to the Covid-19, especially Movie industry. In many countries, in order to control the spreading of virus, governments implemented some interventions like shut down the movie theater and close the restaurants ect. For better help the film industry, we hope to give some suggestions by analyzing the dataset to help directors gain a great success in the box office.
 
+# What is box office
+
+Here is a short video to tell us what is box office?
+
+<img src="./download" style="width:75%">
+
+[Box office](https://www.youtube.com/watch?v=XBR_KwTK25Q)
+
+
 # What we do
 We are curious about what factors of movies are related to a hit at the box office. Thus, based on the dataset, we want to explore something:
 
