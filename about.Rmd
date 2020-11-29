@@ -1,17 +1,18 @@
 ---
-title: "About Me"
+title: "About Us"
 output: 
   html_document:
     toc: true
     toc_float: true
 ---
-
+# Overview
 This is the about page
 
 Our project aims to provide a "Handbook to movie producers"
 
-2020 is a really special year to us. Most industries are suffering great loss due to the Covid-19, especially Movie industry. In many countries, in order to control the spreading of virus, governments implemented some interventions like shut down the movie theater and close the restaurants ect. 
+2020 is a really special year to us. Most industries are suffering great loss due to the Covid-19, especially Movie industry. In many countries, in order to control the spreading of virus, governments implemented some interventions like shut down the movie theater and close the restaurants ect. For better help the film industry, we hope to give some suggestions by analyzing the dataset to help directors gain a great success in the box office.
 
+# What we do
 We are curious about what factors of movies are related to a hit at the box office. Thus, based on the dataset, we want to explore something:
 
 * 1. We constructed a general model to explore the relationship between some variables in the dataset with the box office. Then, using the model to predict the box office of a movie.
