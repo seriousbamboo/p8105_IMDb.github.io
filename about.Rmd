@@ -7,3 +7,25 @@ output:
 ---
 
 This is the about page
+
+Our project aims to provide a "Handbook to movie producers"
+
+2020 is a really special year to us. Most industries are suffering great loss due to the Covid-19, especially Movie industry. In many countries, in order to control the spreading of virus, governments implemented some interventions like shut down the movie theater and close the restaurants ect. 
+
+We are curious about what factors of movies are related to a hit at the box office. Thus, based on the dataset, we want to explore something:
+
+* 1. We constructed a general model to explore the relationship between some variables in the dataset with the box office. Then, using the model to predict the box office of a movie.
+
+* 2. We want to see the director's box office appeal. Like the relationship between social media like number of the director and his/her movie's box office.
+
+* 3. What's the audience's size of some common movie types, like action movie, adventure movie, fantasy movie, romance movie ect. What's the most popular movie genre? 
+
+* 4. A high movie rating equals a good box office? Maybe not in some scenarios. Thus, we would find the relationship between these.
+
+* 5. In the dataset, we have Facebook rating and IMDB rating. We want to see the difference between these two groups of audiences. What is the  preference of these audiences in movie?
+
+* 6. Balancing investigation is a quite common challenge for most directors. Is is a positive relationship between investigation and box office? 
+
+* 7. Not only the protagonists have Facebook, but also other casts have their Facebook. Exploring the box office and the protagonists' Facebook like number or total casts' Facebook like number would help directors to choose actors. 
+
+Hope all we done can provides something to directors or to people who are interested in researching the factors of box office.

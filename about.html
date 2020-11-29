@@ -25,19 +25,8 @@
 <script src="site_libs/navigation-1.1/tabsets.js"></script>
 <link href="site_libs/highlightjs-9.12.0/default.css" rel="stylesheet" />
 <script src="site_libs/highlightjs-9.12.0/highlight.js"></script>
-<link href="site_libs/anchor-sections-1.0/anchor-sections.css" rel="stylesheet" />
-<script src="site_libs/anchor-sections-1.0/anchor-sections.js"></script>
 <link href="site_libs/font-awesome-5.1.0/css/all.css" rel="stylesheet" />
 <link href="site_libs/font-awesome-5.1.0/css/v4-shims.css" rel="stylesheet" />
-
-<style type="text/css">
-  code{white-space: pre-wrap;}
-  span.smallcaps{font-variant: small-caps;}
-  span.underline{text-decoration: underline;}
-  div.column{display: inline-block; vertical-align: top; width: 50%;}
-  div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
-  ul.task-list{list-style: none;}
-    </style>
 
 <style type="text/css">code{white-space: pre;}</style>
 <style type="text/css">
@@ -396,6 +385,33 @@ div.tocify {
 
 
 <p>This is the about page</p>
+<p>Our project aims to provide a “Handbook to movie producers”</p>
+<p>2020 is a really special year to us. Most industries are suffering great loss due to the Covid-19, especially Movie industry. In many countries, in order to control the spreading of virus, governments implemented some interventions like shut down the movie theater and close the restaurants ect.</p>
+<p>We are curious about what factors of movies are related to a hit at the box office. Thus, based on the dataset, we want to explore something:</p>
+<ul>
+<li><ol style="list-style-type: decimal">
+<li>We constructed a general model to explore the relationship between some variables in the dataset with the box office. Then, using the model to predict the box office of a movie.</li>
+</ol></li>
+<li><ol start="2" style="list-style-type: decimal">
+<li>We want to see the director’s box office appeal. Like the relationship between social media like number of the director and his/her movie’s box office.</li>
+</ol></li>
+<li><ol start="3" style="list-style-type: decimal">
+<li>What’s the audience’s size of some common movie types, like action movie, adventure movie, fantasy movie, romance movie ect. What’s the most popular movie genre?</li>
+</ol></li>
+<li><ol start="4" style="list-style-type: decimal">
+<li>A high movie rating equals a good box office? Maybe not in some scenarios. Thus, we would find the relationship between these.</li>
+</ol></li>
+<li><ol start="5" style="list-style-type: decimal">
+<li>In the dataset, we have Facebook rating and IMDB rating. We want to see the difference between these two groups of audiences. What is the preference of these audiences in movie?</li>
+</ol></li>
+<li><ol start="6" style="list-style-type: decimal">
+<li>Balancing investigation is a quite common challenge for most directors. Is is a positive relationship between investigation and box office?</li>
+</ol></li>
+<li><ol start="7" style="list-style-type: decimal">
+<li>Not only the protagonists have Facebook, but also other casts have their Facebook. Exploring the box office and the protagonists’ Facebook like number or total casts’ Facebook like number would help directors to choose actors.</li>
+</ol></li>
+</ul>
+<p>Hope all we done can provides something to directors or to people who are interested in researching the factors of box office.</p>
 
 
 
@@ -408,7 +424,7 @@ div.tocify {
 
 // add bootstrap table styles to pandoc tables
 function bootstrapStylePandocTables() {
-  $('tr.odd').parent('tbody').parent('table').addClass('table table-condensed');
+  $('tr.header').parent('thead').parent('table').addClass('table table-condensed');
 }
 $(document).ready(function () {
   bootstrapStylePandocTables();
