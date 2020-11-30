@@ -29,7 +29,8 @@ for (i in 1:nrow(dataset_r)) {
 }
 
 imdb_ymd = read_csv("./imdb_release.csv") %>% 
-  separate(release_date, into = c("day","month","year"), sep = " ", fill = "left")
+  separate(release_date, into = c("day","month","year"), sep = " ", fill = "left") %>% 
+  write_csv(.,"imdb_ymd.csv")
 
 ### Cleaning
 imdb_clean = 
