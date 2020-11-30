@@ -56,14 +56,40 @@ imdb_after_genre = data.frame(imdb, niubility)
 imdb_model = 
   imdb_after_genre %>% 
   select(num_critic_for_reviews:gross, num_voted_users:num_user_for_reviews, budget, imdb_score: Film.Noir)
+```
 
+```{r}
 #build a comprehensive model 
-lm = lm(gross ~., data = imdb_model)
+lm = lm(gross ~., data = na.omit(imdb_model))
+lm.step = step(lm, direction = "both", trace = FALSE)
+summary(lm.step)
 summary(lm)
 
+#stepwise with genres
+imdb_model_genre = 
+  imdb_after_genre %>% 
+  select(gross, Action: Film.Noir)
+lm.genre = lm(gross~., data = na.omit(imdb_model_genre))
+lm.genre.step = step(lm.genre, direction = "both", trace = FALSE)
+summary(lm.genre.step)
+
+```
+```{r}
+#model without genre
+imdb_model_no_genre = 
+  imdb_model %>% 
+  select(-(Action: Film.Noir))
+lm.nogenre = lm(gross~., data = na.omit(imdb_model_no_genre))
+lm.nogenre.step = step(lm.nogenre, direction = "both", trace = FALSE)
+summary(lm.nogenre.step)
+```
+
+```{r}
 imdb_model_clean = 
   imdb_model %>% 
   select(num_critic_for_reviews:num_user_for_reviews, imdb_score, Action:Fantasy, Romance:Family, Drama, Sport:Horror, Music)
+
+
 
 lm_clean = lm(gross ~., data = imdb_model_clean)
 plot(lm_clean)
