@@ -11,15 +11,17 @@ library(tidyverse)
 library(stringr)
 ```
 
-### import data
+### import and cleaning data
 ```{r, message=FALSE}
 imdb_raw = read_csv("./movie_metadata.csv")
 ```
 
 ```{r}
+#data cleaning 
 imdb = imdb_raw %>%
   as.data.frame() %>% 
   drop_na(movie_title) %>%
+#keep only interested variables 
   select(
     -color, -actor_2_name, -actor_2_facebook_likes, -actor_3_name, -actor_3_facebook_likes, -facenumber_in_poster, -movie_imdb_link, -content_rating, -plot_keywords
   ) %>%
@@ -29,6 +31,7 @@ rownames(imdb) = c(1:dim(imdb)[1])
 ```
 
 ```{r}
+#separate genres into multiple columns
 a = imdb$genres
 genres_list = unique(unlist(str_split(a, "[|]")))
 
@@ -47,13 +50,16 @@ rownames(niubility) = c(1:dim(imdb)[1])
 imdb_after_genre = data.frame(imdb, niubility)
 ```
 
+### Model building 
+
 ```{r}
 imdb_model = 
   imdb_after_genre %>% 
   select(num_critic_for_reviews:gross, num_voted_users:num_user_for_reviews, budget, imdb_score: Film.Noir)
 
+#build a comprehensive model 
 lm = lm(gross ~., data = imdb_model)
-# summary(lm)
+summary(lm)
 
 imdb_model_clean = 
   imdb_model %>% 
@@ -85,8 +91,10 @@ write_csv(imdb_model_clean,"imdb_model_clean.csv")
 str_model = imdb_model %>% janitor::clean_names() %>% drop_na()
 
 ```
+### Build model with stratification of genres
 
 ```{r}
+#generate data frame for each genre
 genres_list = colnames(str_model)[13:length(colnames(str_model))][-22]
 for (genre in genres_list) {
   assign(paste0(genre, "_model_df"), str_model %>% 
@@ -95,11 +103,10 @@ for (genre in genres_list) {
   
   assign(paste0(genre, "_lm"), lm(gross ~., data = get(paste0(genre, "_model_df"))))
 }
-
 ```
 
 ```{r}
-
+#apply regression model to each genre's data frame 
 get_lm <- function(genres){
   summary(get(paste0(genres, "_lm")))
 }
