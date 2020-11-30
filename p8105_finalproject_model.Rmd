@@ -13,7 +13,7 @@ library(stringr)
 
 ### import and cleaning data
 ```{r, message=FALSE}
-imdb_raw = read_csv("./movie_metadata.csv")
+imdb_raw = read_csv("./data/movie_metadata.csv")
 ```
 
 ```{r}
@@ -83,7 +83,7 @@ summary(imdb_model_clean)
 ```
 
 ```{r}
-write_csv(imdb_model_clean,"imdb_model_clean.csv")
+write_csv(imdb_model_clean,"./data/imdb_model_clean.csv")
 ```
 
 

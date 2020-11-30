@@ -4,7 +4,7 @@ library(stringr)
 library(xml2)
 library(rvest)
 ### Import data
-imdb_raw = read_csv("./movie_metadata.csv")
+imdb_raw = read_csv("./data/movie_metadata.csv")
 
 ### Get the year month date:
 
@@ -20,17 +20,17 @@ get_ymd <- function(url_raw)
 }
 
 for (i in 1:nrow(dataset_r)) {
-  test_df = read_csv("./imdb_release.csv")
+  test_df = read_csv("./data/imdb_release.csv")
   if (is.na(test_df[[3]][i])) {
     test_df[[3]][i] <- get_ymd(test_df[[2]][i])
   } 
   test_df %>% 
-    write_csv(.,"imdb_release.csv")
+    write_csv(.,"./data/imdb_release.csv")
 }
 
-imdb_ymd = read_csv("./imdb_release.csv") %>% 
+imdb_ymd = read_csv("./data/imdb_release.csv") %>% 
   separate(release_date, into = c("day","month","year"), sep = " ", fill = "left") %>% 
-  write_csv(.,"imdb_ymd.csv")
+  write_csv(.,"./data/imdb_ymd.csv")
 
 ### Cleaning
 imdb_clean = 
@@ -54,7 +54,7 @@ imdb_clean =
   select(-dummy) %>% 
   drop_na(plot_keyword)  
 imdb_clean %>% 
-  write_csv(.,"./imdb_explore_clean.csv")
+  write_csv(.,"./data/imdb_explore_clean.csv")
 
 ### Get the date of onboarding:
 
