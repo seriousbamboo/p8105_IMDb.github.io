@@ -19,10 +19,17 @@ get_ymd <- function(url_raw)
   return(ymd)
 }
 
-#imdb = 
-#  imdb_raw %>% 
-#  mutate(ymd = map(movie_imdb_link, get_ymd)) %>% 
-#  unnest(ymd)
+for (i in 1:nrow(dataset_r)) {
+  test_df = read_csv("./imdb_release.csv")
+  if (is.na(test_df[[3]][i])) {
+    test_df[[3]][i] <- get_ymd(test_df[[2]][i])
+  } 
+  test_df %>% 
+    write_csv(.,"imdb_release.csv")
+}
+
+imdb_ymd = read_csv("./imdb_release.csv") %>% 
+  separate(release_date, into = c("day","month","year"), sep = " ", fill = "left")
 
 ### Cleaning
 imdb_clean = 
