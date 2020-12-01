@@ -18,16 +18,16 @@ Explore--
 find the association between director's facebook like and gross
 ```{r}
 dataset = read.csv("./imdb_model_clean.csv") 
-dataset %>% 
-  filter(director_facebook_likes != 0 & director_facebook_likes < 2000 ) %>% 
-  ggplot(aes(x = director_facebook_likes, y = gross)) +
-  geom_point()
 
 dataset %>% 
-  filter(director_facebook_likes != 0 & 2000 < director_facebook_likes) %>% 
-  ggplot(aes(x = director_facebook_likes, y = gross, color =  )) +
-  geom_point() 
- # from above two plots we can see that there is no direct association between director's facebook like and  movie's gross
+  filter(director_facebook_likes != 0) %>% 
+  mutate(log_director = log(director_facebook_likes)) %>% 
+  filter(gross > 5000000 & log_director > 1 & log_director < 7 ) %>% 
+  ggplot(aes(x = log_director, y = gross)) +
+  geom_point()
+
+ # From above plot we can see that there is no direct association between director's facebook like and  movie's gross
+
 ```
 
 the association between audience size and movie type
@@ -35,11 +35,20 @@ the association between audience size and movie type
 
 ```
 
-the association between 
+the association between actor_1_facebook_likes and gross
+```{r}
+dataset %>% 
+  select(actor_1_facebook_likes, gross) %>% 
+  mutate(log_actor_1_facebook_likes = )
+  filter(actor_1_facebook_likes < 0.5e+05) %>% 
+  ggplot(aes(x = actor_1_facebook_likes, y = gross)) +
+  geom_point()
+```
+
+the association between actor_1_facebook_likes and gross
 ```{r}
 
 ```
-
 
 wordcloud
 ```{r}
