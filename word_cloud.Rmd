@@ -1,0 +1,74 @@
+---
+title: "word_cloud"
+author: "Yatong Feng"
+output: 
+  html_document:
+    toc: true
+    toc_float: true
+---
+
+```{r setup, message = F, include = F}
+library(tidyverse)
+library(reshape)
+library(tm)
+library(SnowballC) 
+library(wordcloud)
+library(RColorBrewer)
+
+
+
+knitr::opts_chunk$set(
+  message = F,
+  warning = F
+)
+theme_set(theme_minimal() + theme(legend.position = "bottom"))
+options(
+  ggplot2.continuous.colour = "viridis",
+  ggplot2.continuous.fill = "viridis"
+)
+scale_colour_discrete = scale_color_viridis_d
+scale_fill_discrete = scale_fill_viridis_d
+```
+
+
+```{r, include = F, message = F}
+imdb_raw = 
+  read_csv("./data/movie_metadata.csv") %>% 
+  as.data.frame() %>% 
+  mutate(movie_title = str_replace(movie_title,"\\?$","")) %>% 
+  select(director_name, actor_2_name, actor_1_name, actor_3_name)
+
+sep_func = function(label){
+
+  unlist(str_split(imdb_raw %>% drop_na(label) %>% pull(label), " "))
+  
+}
+```
+
+
+```{r, include = F, message = F}
+word_list = 
+  unlist(map(ls(imdb_raw), sep_func)) %>% 
+  as.data.frame()
+
+colnames(word_list) = "word"
+
+final =
+  word_list %>% 
+  group_by(word) %>% 
+  summarise(freq = n()) %>% 
+  arrange(desc(freq))
+
+```
+
+```{r, message = F, warning=FALSE}
+wordcloud(
+  words = final$word,
+  freq = final$freq,
+  min.freq = 1,
+  max.words=200, 
+  random.order=FALSE, 
+  rot.per=0.35,
+  colors=brewer.pal(8, "Dark2"))
+```
+
