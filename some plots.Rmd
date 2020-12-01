@@ -8,16 +8,18 @@ output: html_document
 ```{r setup, include=FALSE}
 library(flexdashboard)
 library(tidyverse)
-#library(p8105.datasets)
+library(p8105.datasets)
 library(plotly)
 library(lubridate)
-
+library(viridis)
 ```
 Explore--
 
 find the association between director's facebook like and gross
 ```{r}
-dataset = read.csv("./imdb_model_clean.csv") 
+dataset = read.csv("./data/imdb_model_clean.csv") 
+ep_dataset =read.csv("./data/imdb_explore_clean.csv")
+
 
 dataset %>% 
   filter(director_facebook_likes != 0) %>% 
@@ -26,33 +28,113 @@ dataset %>%
   ggplot(aes(x = log_director, y = gross)) +
   geom_point()
 
- # From above plot we can see that there is no direct association between director's facebook like and  movie's gross
+ # From above plot we can see that there is no direct association between director's facebook like and movie's gross
 
 ```
 
-the association between audience size and movie type
+
+explore the characteristics of some variables
 ```{r}
-
+ep_dataset %>% 
+  select(actor_1_facebook_likes,actor_3_facebook_likes,cast_total_facebook_likes) %>% 
+  filter(
+    actor_1_facebook_likes != 0,
+    cast_total_facebook_likes!= 0,
+    actor_3_facebook_likes != 0
+         ) %>% 
+  distinct() %>% 
+  pivot_longer(
+    actor_1_facebook_likes:cast_total_facebook_likes,
+    names_to = "facebook_likes",
+    values_to = "number_likes"
+  ) %>% 
+  mutate(log_number_likes = log(number_likes)) %>% 
+  ggplot(aes(x = reorder(facebook_likes, -log_number_likes) , y = log_number_likes, fill = facebook_likes)) + 
+    geom_violin() +
+    geom_boxplot(width=0.1, color="black", alpha=0.2) +
+    scale_fill_viridis(discrete = TRUE) +
+    theme(
+      legend.position="none",
+      plot.title = element_text(size=11)
+    ) +
+    ggtitle("Facebook likes of different group in movie")+
+    xlab("Facebook likes") +
+    ylab("Log of Facebook likes")
 ```
 
-the association between actor_1_facebook_likes and gross
+explore the relationship between move genre and its duration
+```{r}
+orderds = ep_dataset %>% 
+  select(duration,genres) %>% 
+  distinct() 
+
+orderds %>% 
+  filter(genres != "News",
+         genres !="Film-Noir") %>% 
+  ggplot(aes(x = reorder(genres,-duration, na.rm = TRUE), y = duration, color = genres)) + 
+    geom_boxplot() +
+    theme(axis.text.x = element_text(angle=90, hjust=1, vjust=1))
+```
+
+
+the association between imbd_score and gross
 ```{r}
 dataset %>% 
-  select(actor_1_facebook_likes, gross) %>% 
-  mutate(log_actor_1_facebook_likes = )
-  filter(actor_1_facebook_likes < 0.5e+05) %>% 
-  ggplot(aes(x = actor_1_facebook_likes, y = gross)) +
-  geom_point()
+  select(imdb_score, gross) %>% 
+  filter(imdb_score>3.75 & imdb_score<8.5) %>% 
+  ggplot(aes(x = imdb_score, y = gross)) +
+  geom_point() +
+  theme_bw(base_size=20) +
+  geom_smooth(method='lm', se=TRUE) +
+  labs(x="IMDB score of movie", y="Movie gross")
+
+# the association between imdb score and movie gross are proportional, althought it is not obvious.
+
 ```
 
-the association between actor_1_facebook_likes and gross
+
+the association between cast total facebook like and gross
+
 ```{r}
+dataset %>% 
+  select(cast_total_facebook_likes, gross) %>% 
+  mutate(log_cast_total_facebook_likes = log(cast_total_facebook_likes)) %>% 
+  filter(log_cast_total_facebook_likes<9 & log_cast_total_facebook_likes>5) %>% 
+  ggplot(aes(x = log_cast_total_facebook_likes, y = gross)) +
+  geom_hex()
 
 ```
 
-wordcloud
+association between budget and genre
 ```{r}
+ep_dataset %>% 
+  select(budget, genres) %>% 
+  distinct() %>% 
+  filter(budget<3e+08) %>% 
+  filter(genres != "News",
+         genres !="Film-Noir") %>% 
+  ggplot( aes(x=reorder(genres,-budget, na.rm = TRUE), y=budget, fill=genres)) +
+    geom_boxplot() +
+    scale_fill_viridis(discrete = TRUE, alpha=0.6) +
+    geom_jitter(color="black", size=0.4, alpha=0.9) +
+    theme(
+      legend.position="none",
+      plot.title = element_text(size=11)
+    ) +
+    theme(axis.text.x = element_text(angle=90, hjust=1, vjust=1))+
+    ggtitle("A boxplot with budget") +
+    xlab("Movie genre") +
+    ylab("Budget of movie")   
 
-  
 ```
 
+association between budget and gross
+```{r}
+ep_dataset %>% 
+  select(budget, gross, genres) %>% 
+  filter(budget<3e+08) %>% 
+  ggplot(aes(x=budget, y=gross)) +
+  geom_hex()
+```
+
+ˆ

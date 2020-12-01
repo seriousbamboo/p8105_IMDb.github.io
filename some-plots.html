@@ -24,8 +24,19 @@
 <script src="site_libs/navigation-1.1/tabsets.js"></script>
 <link href="site_libs/highlightjs-9.12.0/default.css" rel="stylesheet" />
 <script src="site_libs/highlightjs-9.12.0/highlight.js"></script>
+<link href="site_libs/anchor-sections-1.0/anchor-sections.css" rel="stylesheet" />
+<script src="site_libs/anchor-sections-1.0/anchor-sections.js"></script>
 <link href="site_libs/font-awesome-5.1.0/css/all.css" rel="stylesheet" />
 <link href="site_libs/font-awesome-5.1.0/css/v4-shims.css" rel="stylesheet" />
+
+<style type="text/css">
+  code{white-space: pre-wrap;}
+  span.smallcaps{font-variant: small-caps;}
+  span.underline{text-decoration: underline;}
+  div.column{display: inline-block; vertical-align: top; width: 50%;}
+  div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+  ul.task-list{list-style: none;}
+    </style>
 
 <style type="text/css">code{white-space: pre;}</style>
 <style type="text/css">
@@ -314,21 +325,106 @@ $(document).ready(function () {
 
 <p>Explore–</p>
 <p>find the association between director’s facebook like and gross</p>
-<pre class="r"><code>dataset = read.csv(&quot;./imdb_model_clean.csv&quot;) 
+<pre class="r"><code>dataset = read.csv(&quot;./data/imdb_model_clean.csv&quot;) 
+ep_dataset =read.csv(&quot;./data/imdb_explore_clean.csv&quot;)
+
+
 dataset %&gt;% 
-  filter(director_facebook_likes != 0 &amp; director_facebook_likes &lt; 2000 ) %&gt;% 
-  ggplot(aes(x = director_facebook_likes, y = gross)) +
+  filter(director_facebook_likes != 0) %&gt;% 
+  mutate(log_director = log(director_facebook_likes)) %&gt;% 
+  filter(gross &gt; 5000000 &amp; log_director &gt; 1 &amp; log_director &lt; 7 ) %&gt;% 
+  ggplot(aes(x = log_director, y = gross)) +
   geom_point()</code></pre>
 <p><img src="some-plots_files/figure-html/unnamed-chunk-1-1.png" width="672" /></p>
+<pre class="r"><code> # From above plot we can see that there is no direct association between director&#39;s facebook like and movie&#39;s gross</code></pre>
+<p>explore the characteristics of some variables</p>
+<pre class="r"><code>ep_dataset %&gt;% 
+  select(actor_1_facebook_likes,actor_3_facebook_likes,cast_total_facebook_likes) %&gt;% 
+  filter(
+    actor_1_facebook_likes != 0,
+    cast_total_facebook_likes!= 0,
+    actor_3_facebook_likes != 0
+         ) %&gt;% 
+  distinct() %&gt;% 
+  pivot_longer(
+    actor_1_facebook_likes:cast_total_facebook_likes,
+    names_to = &quot;facebook_likes&quot;,
+    values_to = &quot;number_likes&quot;
+  ) %&gt;% 
+  mutate(log_number_likes = log(number_likes)) %&gt;% 
+  ggplot(aes(x = reorder(facebook_likes, -log_number_likes) , y = log_number_likes, fill = facebook_likes)) + 
+    geom_violin() +
+    geom_boxplot(width=0.1, color=&quot;black&quot;, alpha=0.2) +
+    scale_fill_viridis(discrete = TRUE) +
+    theme(
+      legend.position=&quot;none&quot;,
+      plot.title = element_text(size=11)
+    ) +
+    ggtitle(&quot;Facebook likes of different group in movie&quot;)+
+    xlab(&quot;Facebook likes&quot;) +
+    ylab(&quot;Log of Facebook likes&quot;)</code></pre>
+<p><img src="some-plots_files/figure-html/unnamed-chunk-2-1.png" width="672" /></p>
+<p>explore the relationship between move genre and its duration</p>
+<pre class="r"><code>orderds = ep_dataset %&gt;% 
+  select(duration,genres) %&gt;% 
+  distinct() 
+
+orderds %&gt;% 
+  filter(genres != &quot;News&quot;,
+         genres !=&quot;Film-Noir&quot;) %&gt;% 
+  ggplot(aes(x = reorder(genres,-duration, na.rm = TRUE), y = duration, color = genres)) + 
+    geom_boxplot() +
+    theme(axis.text.x = element_text(angle=90, hjust=1, vjust=1))</code></pre>
+<pre><code>## Warning: Removed 3 rows containing non-finite values (stat_boxplot).</code></pre>
+<p><img src="some-plots_files/figure-html/unnamed-chunk-3-1.png" width="672" /></p>
+<p>the association between imbd_score and gross</p>
 <pre class="r"><code>dataset %&gt;% 
-  filter(director_facebook_likes != 0 &amp; 2000 &lt; director_facebook_likes) %&gt;% 
-  ggplot(aes(x = director_facebook_likes, y = gross, color =  )) +
-  geom_point() </code></pre>
-<p><img src="some-plots_files/figure-html/unnamed-chunk-1-2.png" width="672" /></p>
-<pre class="r"><code> # from above two plots we can see that there is no direct association between director&#39;s facebook like and  movie&#39;s gross</code></pre>
-<p>the association between audience size and movie type</p>
-<p>the association between</p>
-<p>wordcloud</p>
+  select(imdb_score, gross) %&gt;% 
+  filter(imdb_score&gt;3.75 &amp; imdb_score&lt;8.5) %&gt;% 
+  ggplot(aes(x = imdb_score, y = gross)) +
+  geom_point() +
+  theme_bw(base_size=20) +
+  geom_smooth(method=&#39;lm&#39;, se=TRUE) +
+  labs(x=&quot;IMDB score of movie&quot;, y=&quot;Movie gross&quot;)</code></pre>
+<pre><code>## `geom_smooth()` using formula &#39;y ~ x&#39;</code></pre>
+<p><img src="some-plots_files/figure-html/unnamed-chunk-4-1.png" width="672" /></p>
+<pre class="r"><code># the association between imdb score and movie gross are proportional, althought it is not obvious.</code></pre>
+<p>the association between cast total facebook like and gross</p>
+<pre class="r"><code>dataset %&gt;% 
+  select(cast_total_facebook_likes, gross) %&gt;% 
+  mutate(log_cast_total_facebook_likes = log(cast_total_facebook_likes)) %&gt;% 
+  filter(log_cast_total_facebook_likes&lt;9 &amp; log_cast_total_facebook_likes&gt;5) %&gt;% 
+  ggplot(aes(x = log_cast_total_facebook_likes, y = gross)) +
+  geom_hex()</code></pre>
+<p><img src="some-plots_files/figure-html/unnamed-chunk-5-1.png" width="672" /></p>
+<p>association between budget and genre</p>
+<pre class="r"><code>ep_dataset %&gt;% 
+  select(budget, genres) %&gt;% 
+  distinct() %&gt;% 
+  filter(budget&lt;3e+08) %&gt;% 
+  filter(genres != &quot;News&quot;,
+         genres !=&quot;Film-Noir&quot;) %&gt;% 
+  ggplot( aes(x=reorder(genres,-budget, na.rm = TRUE), y=budget, fill=genres)) +
+    geom_boxplot() +
+    scale_fill_viridis(discrete = TRUE, alpha=0.6) +
+    geom_jitter(color=&quot;black&quot;, size=0.4, alpha=0.9) +
+    theme(
+      legend.position=&quot;none&quot;,
+      plot.title = element_text(size=11)
+    ) +
+    theme(axis.text.x = element_text(angle=90, hjust=1, vjust=1))+
+    ggtitle(&quot;A boxplot with budget&quot;) +
+    xlab(&quot;Movie genre&quot;) +
+    ylab(&quot;Budget of movie&quot;)   </code></pre>
+<p><img src="some-plots_files/figure-html/unnamed-chunk-6-1.png" width="672" /></p>
+<p>association between budget and gross</p>
+<pre class="r"><code>ep_dataset %&gt;% 
+  select(budget, gross, genres) %&gt;% 
+  filter(budget&lt;3e+08) %&gt;% 
+  ggplot(aes(x=budget, y=gross)) +
+  geom_hex()</code></pre>
+<p><img src="some-plots_files/figure-html/unnamed-chunk-7-1.png" width="672" /></p>
+<p>ˆ</p>
 
 
 
@@ -339,7 +435,7 @@ dataset %&gt;%
 
 // add bootstrap table styles to pandoc tables
 function bootstrapStylePandocTables() {
-  $('tr.header').parent('thead').parent('table').addClass('table table-condensed');
+  $('tr.odd').parent('tbody').parent('table').addClass('table table-condensed');
 }
 $(document).ready(function () {
   bootstrapStylePandocTables();
