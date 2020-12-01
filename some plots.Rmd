@@ -2,7 +2,7 @@
 title: "some plots we can use"
 author: "Jiying Han"
 date: "11/29/2020"
-output: html_document
+output: github_document
 ---
 
 ```{r setup, include=FALSE}
