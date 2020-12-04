@@ -334,8 +334,18 @@ dataset %&gt;%
   mutate(log_director = log(director_facebook_likes)) %&gt;% 
   filter(gross &gt; 5000000 &amp; log_director &gt; 1 &amp; log_director &lt; 7 ) %&gt;% 
   ggplot(aes(x = log_director, y = gross)) +
-  geom_point()</code></pre>
+  geom_point()+
+  geom_smooth(method=&#39;lm&#39;, se=TRUE)</code></pre>
+<pre><code>## `geom_smooth()` using formula &#39;y ~ x&#39;</code></pre>
 <p><img src="some-plots_files/figure-html/unnamed-chunk-1-1.png" width="672" /></p>
+<pre class="r"><code>dataset %&gt;% 
+  filter(director_facebook_likes != 0) %&gt;% 
+  mutate(log_director = log(director_facebook_likes),
+         log_gross = log(gross)) %&gt;% 
+  filter(gross &gt; 5000000 &amp; log_director &gt; 1 &amp; log_director &lt; 7 ) %&gt;% 
+  ggplot(aes(x = log_director, y = log_gross)) +
+  geom_hex()</code></pre>
+<p><img src="some-plots_files/figure-html/unnamed-chunk-1-2.png" width="672" /></p>
 <pre class="r"><code> # From above plot we can see that there is no direct association between director&#39;s facebook like and movie&#39;s gross</code></pre>
 <p>explore the characteristics of some variables</p>
 <pre class="r"><code>ep_dataset %&gt;% 
@@ -364,7 +374,7 @@ dataset %&gt;%
     xlab(&quot;Facebook likes&quot;) +
     ylab(&quot;Log of Facebook likes&quot;)</code></pre>
 <p><img src="some-plots_files/figure-html/unnamed-chunk-2-1.png" width="672" /></p>
-<p>explore the relationship between move genre and its duration</p>
+<p>explore the relationship between move genre and its duration(don’t need)</p>
 <pre class="r"><code>orderds = ep_dataset %&gt;% 
   select(duration,genres) %&gt;% 
   distinct() 
@@ -407,7 +417,6 @@ orderds %&gt;%
   ggplot( aes(x=reorder(genres,-budget, na.rm = TRUE), y=budget, fill=genres)) +
     geom_boxplot() +
     scale_fill_viridis(discrete = TRUE, alpha=0.6) +
-    geom_jitter(color=&quot;black&quot;, size=0.4, alpha=0.9) +
     theme(
       legend.position=&quot;none&quot;,
       plot.title = element_text(size=11)
@@ -417,6 +426,25 @@ orderds %&gt;%
     xlab(&quot;Movie genre&quot;) +
     ylab(&quot;Budget of movie&quot;)   </code></pre>
 <p><img src="some-plots_files/figure-html/unnamed-chunk-6-1.png" width="672" /></p>
+<pre class="r"><code>ep_dataset %&gt;% 
+  select(budget, genres) %&gt;% 
+  distinct() %&gt;% 
+  filter(budget&lt;3e+08) %&gt;% 
+  filter(genres != &quot;News&quot;,
+         genres !=&quot;Film-Noir&quot;) %&gt;% 
+  mutate(log_budget = log(budget)) %&gt;% 
+  ggplot( aes(x=reorder(genres,-budget, na.rm = TRUE), y=log_budget, fill=genres)) +
+    geom_boxplot() +
+    scale_fill_viridis(discrete = TRUE, alpha=0.6) +
+    theme(
+      legend.position=&quot;none&quot;,
+      plot.title = element_text(size=11)
+    ) +
+    theme(axis.text.x = element_text(angle=90, hjust=1, vjust=1))+
+    ggtitle(&quot;A boxplot with budget&quot;) +
+    xlab(&quot;Movie genre&quot;) +
+    ylab(&quot;Budget of movie&quot;)   </code></pre>
+<p><img src="some-plots_files/figure-html/unnamed-chunk-6-2.png" width="672" /></p>
 <p>association between budget and gross</p>
 <pre class="r"><code>ep_dataset %&gt;% 
   select(budget, gross, genres) %&gt;% 
@@ -424,7 +452,75 @@ orderds %&gt;%
   ggplot(aes(x=budget, y=gross)) +
   geom_hex()</code></pre>
 <p><img src="some-plots_files/figure-html/unnamed-chunk-7-1.png" width="672" /></p>
-<p>ˆ</p>
+<p>number of critics for reviews and gross</p>
+<pre class="r"><code>ep_dataset %&gt;% 
+  select(num_critic_for_reviews , gross) %&gt;% 
+  distinct() %&gt;% 
+  mutate(gross = log(gross)) %&gt;% 
+  ggplot(aes(x = num_critic_for_reviews, y = gross)) +
+  geom_hex()</code></pre>
+<pre><code>## Warning: Removed 1 rows containing non-finite values (stat_binhex).</code></pre>
+<p><img src="some-plots_files/figure-html/unnamed-chunk-8-1.png" width="672" /></p>
+<p>number of voted users and gross</p>
+<pre class="r"><code>ep_dataset %&gt;% 
+  select(gross, num_voted_users) %&gt;% 
+  distinct() %&gt;% 
+  mutate(gross = log(gross)) %&gt;% 
+  ggplot(aes(x = num_voted_users, y = gross)) +
+  geom_point(
+    color=&quot;black&quot;,
+        fill=&quot;#69b3a2&quot;,
+        shape=22,
+        alpha=0.5,
+        size=3,
+        stroke = 1
+        ) +
+  theme_ipsum()</code></pre>
+<p><img src="some-plots_files/figure-html/unnamed-chunk-9-1.png" width="672" /></p>
+<p>gross and facebook likes</p>
+<pre class="r"><code>ep_dataset %&gt;% 
+  select(cast_total_facebook_likes,gross, genres) %&gt;% 
+  distinct() %&gt;% 
+  mutate(cast_total_facebook_likes = log(cast_total_facebook_likes)) %&gt;% 
+  ggplot(aes(x = cast_total_facebook_likes, y = gross,color = genres )) +
+  geom_point() +
+  coord_cartesian()</code></pre>
+<p><img src="some-plots_files/figure-html/unnamed-chunk-10-1.png" width="672" /></p>
+<pre class="r"><code>ep_dataset %&gt;% 
+  select(movie_facebook_likes,gross, genres) %&gt;% 
+  mutate(gross = log(gross)) %&gt;% 
+  ggplot(aes(x = movie_facebook_likes, y = gross, color = genres)) +
+  geom_point( 
+    color=&quot;orange&quot;,
+    fill=&quot;#69b3a2&quot;,
+    shape=21,
+    alpha=0.3,
+    size=2,
+    stroke = 1)</code></pre>
+<p><img src="some-plots_files/figure-html/unnamed-chunk-10-2.png" width="672" /></p>
+<pre class="r"><code>ep_dataset %&gt;% 
+  select(actor_1_facebook_likes, actor_2_facebook_likes, actor_3_facebook_likes, gross) %&gt;%
+  distinct() %&gt;% 
+  pivot_longer(
+    actor_1_facebook_likes:actor_3_facebook_likes,
+    names_to = &quot;actor&quot;,
+    values_to = &quot;facebook_likes&quot;
+  ) %&gt;% 
+  mutate(
+    actor = as.factor(actor),
+    gross = log(gross)
+  ) %&gt;% 
+  filter(facebook_likes &lt;0.5e+05) %&gt;% 
+  ggplot(aes(x=facebook_likes, y = gross, color = actor)) +
+  geom_point(
+        fill=&quot;#69b3a2&quot;,
+        shape=22,
+        alpha=0.5,
+        size=2,
+        stroke = 1
+        ) +
+    theme_ipsum()</code></pre>
+<p><img src="some-plots_files/figure-html/unnamed-chunk-10-3.png" width="672" /></p>
 
 
 

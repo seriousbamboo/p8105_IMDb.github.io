@@ -12,6 +12,9 @@ library(p8105.datasets)
 library(plotly)
 library(lubridate)
 library(viridis)
+library(ggridges)
+library(hrbrthemes)
+library(viridis)
 ```
 Explore--
 
@@ -26,8 +29,16 @@ dataset %>%
   mutate(log_director = log(director_facebook_likes)) %>% 
   filter(gross > 5000000 & log_director > 1 & log_director < 7 ) %>% 
   ggplot(aes(x = log_director, y = gross)) +
-  geom_point()
+  geom_point()+
+  geom_smooth(method='lm', se=TRUE)
 
+dataset %>% 
+  filter(director_facebook_likes != 0) %>% 
+  mutate(log_director = log(director_facebook_likes),
+         log_gross = log(gross)) %>% 
+  filter(gross > 5000000 & log_director > 1 & log_director < 7 ) %>% 
+  ggplot(aes(x = log_director, y = log_gross)) +
+  geom_hex()
  # From above plot we can see that there is no direct association between director's facebook like and movie's gross
 
 ```
@@ -62,7 +73,7 @@ ep_dataset %>%
     ylab("Log of Facebook likes")
 ```
 
-explore the relationship between move genre and its duration
+explore the relationship between move genre and its duration(don't need)
 ```{r}
 orderds = ep_dataset %>% 
   select(duration,genres) %>% 
@@ -92,7 +103,6 @@ dataset %>%
 
 ```
 
-
 the association between cast total facebook like and gross
 
 ```{r}
@@ -116,7 +126,6 @@ ep_dataset %>%
   ggplot( aes(x=reorder(genres,-budget, na.rm = TRUE), y=budget, fill=genres)) +
     geom_boxplot() +
     scale_fill_viridis(discrete = TRUE, alpha=0.6) +
-    geom_jitter(color="black", size=0.4, alpha=0.9) +
     theme(
       legend.position="none",
       plot.title = element_text(size=11)
@@ -126,6 +135,25 @@ ep_dataset %>%
     xlab("Movie genre") +
     ylab("Budget of movie")   
 
+
+ep_dataset %>% 
+  select(budget, genres) %>% 
+  distinct() %>% 
+  filter(budget<3e+08) %>% 
+  filter(genres != "News",
+         genres !="Film-Noir") %>% 
+  mutate(log_budget = log(budget)) %>% 
+  ggplot( aes(x=reorder(genres,-budget, na.rm = TRUE), y=log_budget, fill=genres)) +
+    geom_boxplot() +
+    scale_fill_viridis(discrete = TRUE, alpha=0.6) +
+    theme(
+      legend.position="none",
+      plot.title = element_text(size=11)
+    ) +
+    theme(axis.text.x = element_text(angle=90, hjust=1, vjust=1))+
+    ggtitle("A boxplot with budget") +
+    xlab("Movie genre") +
+    ylab("Budget of movie")   
 ```
 
 association between budget and gross
@@ -137,4 +165,82 @@ ep_dataset %>%
   geom_hex()
 ```
 
-ˆ
+
+
+
+number of critics for reviews and gross
+```{r}
+ep_dataset %>% 
+  select(num_critic_for_reviews , gross) %>% 
+  distinct() %>% 
+  mutate(gross = log(gross)) %>% 
+  ggplot(aes(x = num_critic_for_reviews, y = gross)) +
+  geom_hex()
+```
+
+number of voted users and gross
+
+```{r}
+ep_dataset %>% 
+  select(gross, num_voted_users) %>% 
+  distinct() %>% 
+  mutate(gross = log(gross)) %>% 
+  ggplot(aes(x = num_voted_users, y = gross)) +
+  geom_point(
+    color="black",
+        fill="#69b3a2",
+        shape=22,
+        alpha=0.5,
+        size=3,
+        stroke = 1
+        ) +
+  theme_ipsum()
+```
+
+gross and facebook likes
+```{r}
+
+ep_dataset %>% 
+  select(cast_total_facebook_likes,gross, genres) %>% 
+  distinct() %>% 
+  mutate(cast_total_facebook_likes = log(cast_total_facebook_likes)) %>% 
+  ggplot(aes(x = cast_total_facebook_likes, y = gross,color = genres )) +
+  geom_point() +
+  coord_cartesian()
+
+ep_dataset %>% 
+  select(movie_facebook_likes,gross, genres) %>% 
+  mutate(gross = log(gross)) %>% 
+  ggplot(aes(x = movie_facebook_likes, y = gross, color = genres)) +
+  geom_point( 
+    color="orange",
+    fill="#69b3a2",
+    shape=21,
+    alpha=0.3,
+    size=2,
+    stroke = 1)
+
+ep_dataset %>% 
+  select(actor_1_facebook_likes, actor_2_facebook_likes, actor_3_facebook_likes, gross) %>%
+  distinct() %>% 
+  pivot_longer(
+    actor_1_facebook_likes:actor_3_facebook_likes,
+    names_to = "actor",
+    values_to = "facebook_likes"
+  ) %>% 
+  mutate(
+    actor = as.factor(actor),
+    gross = log(gross)
+  ) %>% 
+  filter(facebook_likes <0.5e+05) %>% 
+  ggplot(aes(x=facebook_likes, y = gross, color = actor)) +
+  geom_point(
+        fill="#69b3a2",
+        shape=22,
+        alpha=0.5,
+        size=2,
+        stroke = 1
+        ) +
+    theme_ipsum()
+
+```
