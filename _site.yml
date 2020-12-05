@@ -1,7 +1,7 @@
 name: "Yay internet!"
 output_dir: "."
 navbar:
-  title: "P8015_IMDb"
+  title: "Movie \"encyclopedia\""
   right:
     - text: "About page"
       href: about.html

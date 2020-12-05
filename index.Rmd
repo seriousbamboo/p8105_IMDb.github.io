@@ -28,7 +28,8 @@ output:
     </body>  
 </html>
 
-<img src = "images/theater_under_covid.jpg" style = "width:100%"> 
+<img src = "images/theater_under_covid.jpg" style = "width:100%">
+
 
 ###### Image: AMERICAN-STATESMAN/JAY JANNER
 
