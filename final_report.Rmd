@@ -1,6 +1,10 @@
 ---
-title: "Final_report"
-output: html_document
+title: "Final report"
+author: "Jiying Han, Liucheng Shi, Wenhao Gou, Yatong Feng, Zhe Chen"
+output: 
+  html_document:
+    toc: true
+    toc_float: true
 ---
 
 ```{r setup, include=FALSE}
@@ -12,6 +16,12 @@ library(tidyverse)
 library(stringr)
 library(reshape2)
 library(arsenal)
+library(plotly)
+library(lubridate)
+library(viridis)
+library(ggridges)
+library(hrbrthemes)
+library(viridis)
 ```
 
 ```{r, warning=FALSE, echo = FALSE, message=FALSE}
@@ -35,6 +45,9 @@ imdb_model_no_genre =
   select(-(Action: Film.Noir))
 ```
 
+<img src = "images/theaters.png" style = "width:100%"> 
+
+###### Image: REUTERS/Mario Anzuon
 
 ## Motivation:
 
@@ -481,6 +494,212 @@ df_final %>%
   write_csv("./Dataset/shiny_valuedf.csv")
 
 ```
+
+## *Data Exploratory*
+
+
+There are many variables in this dataset. And starting from our goal: try to predict the box office. We already have the dataset, thus first step is trying to find the association between the variables in this dataset.
+
+
+### **Association between Gross and Director's Facebook Likes**
+
+As we all know, director plays a very important role in a movie. But besides his professional skills in shooting movies, we can also explore whether the directors' social influence can be transformed into his movies' gross? That's also to say, whether some data about his or her social media associated with his or her movie. Facebook is one of the most popular social media in the world and in this dataset, it shows the directors' Facebook likes number. Here is the plot of Gross and Director's Facebook Likes:
+
+```{r message=FALSE}
+dataset = read.csv("./data/imdb_model_clean.csv") 
+ep_dataset =read.csv("./data/imdb_explore_clean.csv")
+
+
+# Find the association between director's facebook like and gross
+directors = 
+  dataset %>% 
+  filter(director_facebook_likes != 0) %>% 
+  mutate(log_director = log(director_facebook_likes)) %>% 
+  filter(gross > 5000000 & log_director > 1 & log_director < 7 ) %>% 
+  ggplot(aes(x = log_director, y = gross)) +
+  geom_point()+
+  geom_smooth(method='lm', se=TRUE) +
+  labs( x = "Director's Facebook Likes",
+        y = "Gross",
+        title = "Director's Facebook Likes and Gross Explore") +
+  theme(axis.title.x = element_text(size = 14),
+        axis.title.y = element_text(size = 14),
+        plot.title = element_text(size = 14))
+        
+ggplotly(directors)
+```
+
+We preprocess the number of director's facebook likes with log function, and drop the missing values. Some extreme low gross are also excluded.From above plot we can see that there are some outliers, and most of mvoies' gross are concentrated. From the linear regression line, we can see their is a slight positive association between these two variables, thus, we can further explore its association in our model.
+
+
+### **Explore the Facebook Likes distributions among the casts**
+
+After take a look at director's Facebook likes, we want to further explore other casts' Facebook likes. As we mentioned before, Facebook is one of the most popular social media, and it's the biggest social platform all over the world. Until 2014, it has approximately 2.2 billion users, which accounts for one third of the global population. Thus, Facebook is one of the most important platform for director to promote their movies. In this dataset, it counts the Facebook likes of actor 1, 3 Facebook likes and cast total Facebook likes. Here is a violin plot of Facebook likes distribution:
+
+```{r }
+# explore the characteristics of some variables
+cast = 
+  ep_dataset %>% 
+  select(actor_1_facebook_likes,actor_3_facebook_likes,cast_total_facebook_likes) %>% 
+  filter(
+    actor_1_facebook_likes != 0,
+    cast_total_facebook_likes!= 0,
+    actor_3_facebook_likes != 0
+         ) %>% 
+  distinct() %>% 
+  mutate(
+         Cast_total = cast_total_facebook_likes,
+          Actor_1 = actor_1_facebook_likes,
+         Actor_3 = actor_3_facebook_likes) %>% 
+  select(Cast_total:Actor_3) %>% 
+  pivot_longer(
+    Actor_3:Cast_total,
+    names_to = "facebook_likes",
+    values_to = "number_likes"
+  ) %>% 
+  mutate(number_likes = log(number_likes)) %>% 
+  ggplot(aes(x = reorder(facebook_likes, -number_likes) , y = number_likes, fill = facebook_likes)) + geom_violin() +
+  geom_boxplot(width=0.1, color="black", alpha=0.2) +
+  scale_fill_viridis(discrete = TRUE) +
+  theme(
+    legend.position="none",
+    plot.title = element_text(size=11)
+  ) +
+  ggtitle("Staff's Facebook likes distibution")+
+  xlab("Staff of Crew") +
+  ylab("Facebook likes")  +
+  theme(axis.title.x = element_text(size = 14),
+        axis.title.y = element_text(size = 14),
+        plot.title = element_text(size = 14))
+
+ggplotly(cast)
+```
+
+We also log the number of all Facebook likes and then plot it. In this plot, we can find that the range of cast total Facebook likes number is very similar to protagonist(`Actor 1`) 's Facebook likes number, from which we can conclude that minor part(`Actor 3`)'s Facebook likes contribute a little to the cast total Facebook likes.
+
+This finding can provide a thought to directors when they thinking about casting and promotion. They can choose actors with great multimedia influence as protagonist if they wan to get much public's attention and have a good promotion effect. 
+
+As for minor parts, they can pay more attention on actors' acting and less considering their influence in social media.
+
+
+### **Association between Cast Total Facebook Likes and Gross**
+
+After study the distribution of staff's Facebook Likes, we make a further step. Generally, we have a concept that with more attention on a movie, the movie will have more audience. This concept related with a connection between social media influence and public's action. Do people's attention will encourage them go to the movie theater and pay for the ticket? We are curious about it. Thus, here is a plot to give me a briefly answer. 
+
+```{r message=FALSE}
+totalfacebook = 
+  dataset %>% 
+  select(cast_total_facebook_likes, gross) %>% 
+  mutate(log_cast_total_facebook_likes = log(cast_total_facebook_likes)) %>% 
+  filter(log_cast_total_facebook_likes<9 & log_cast_total_facebook_likes>5) %>% 
+  ggplot(aes(x = log_cast_total_facebook_likes, y = gross)) +
+  geom_hex()+
+  geom_smooth() +
+  labs(
+    x = "Cast Total Facebook Likes",
+    y = "Gross",
+    title = "Cast Total Facebook Likes and Gross Explore"
+  ) +
+  theme(axis.title.x = element_text(size = 14),
+        axis.title.y = element_text(size = 14),
+        plot.title = element_text(size = 14))
+
+ggplotly(totalfacebook)
+
+```
+
+
+### **Association between IMBd Score and Gross**
+
+
+"Internet Movie Database (IMBd) is an online database of information related to films, television programs, home videos, video games, and streaming content online – including cast, production crew and personal biographies, plot summaries, trivia, ratings, and fan and critical reviews." from Wikipedia. In this dataset, it contains the IMBd score of each movies. This score is very important for us to understand the evaluation of movies in the market. And we want to explore whether there is a positive association between scores and gross. Here is the plot.
+
+```{r message=FALSE}
+imbdscoreplot = 
+  dataset %>% 
+  select(imdb_score, gross) %>% 
+  filter(imdb_score>3.75 & imdb_score<8.5) %>% 
+  ggplot(aes(x = imdb_score, y = gross)) +
+  geom_point() +
+  theme_bw(base_size=20) +
+  geom_smooth(method='lm', se=TRUE) +
+  labs(x="IMDb score of movie", y="Movie gross", title = "IMBd Score and Gross Explore") +
+  theme(axis.title.x = element_text(size = 14),
+        axis.title.y = element_text(size = 14),
+        plot.title = element_text(size = 14))
+
+ggplotly(imbdscoreplot)
+
+```
+
+Similarly, we explore the movies within a general range of IMDB scores. Most movies' scores lie between 6 and 7. From the linear line, we can see a slight positive assiciation between these two variables. This is a good sign for us, and we made a further analysis in our model.
+
+
+
+In this plot, we log the Cast Total Facebook likes. And we exclude some extreme point in Facebook Likes. There are some outliers around 8, and the association is not so obvious. Some high count of Facebook Likes still have low Gross. Thus, in the exploring stage, we can't get any conclusion about this association.
+
+
+### **Association between Budget and Genres**
+
+When we calculate the revenue of investigating a movie, budget can be an essential elements. But there are plenty of movie genres. We can explore the Budget and Movie Genre, from which we can further study the Budget and Gross. This plot help us to see is there a relationship between Movie Genres and Budget? 
+
+```{r message=FALSE}
+budget_genres = 
+  ep_dataset %>% 
+  select(budget, genres) %>% 
+  distinct() %>% 
+  filter(budget<3e+08) %>% 
+  filter(genres != "News",
+         genres !="Film-Noir") %>% 
+  mutate(log_budget = log(budget)) %>% 
+  ggplot( aes(x=reorder(genres,-budget, na.rm = TRUE), y=log_budget, fill=genres)) +
+    geom_boxplot() +
+    scale_fill_viridis(discrete = TRUE, alpha=0.6) +
+    theme(
+      legend.position="none",
+      plot.title = element_text(size=11)
+    ) +
+    theme(axis.text.x = element_text(angle=90, hjust=1, vjust=1),
+          axis.title.x = element_text(size = 14),
+          axis.title.y = element_text(size = 14),
+          plot.title = element_text(size = 14))+
+    ggtitle("A boxplot with Budget") +
+    xlab("Movie genre") +
+    ylab("Budget of movie") 
+
+ggplotly(budget_genres)
+```
+
+Although the median value of different movie genres' budget are different, but in general most genres' range are overlapping. It seems that there is no significant different in Movie Budget among different types of movies.
+
+
+### **Association between Budget and Gross**
+
+
+After studying the association between budget and genres, the next step is to explore the association between Budget and Gross. 
+```{r message=FALSE }
+ep_dataset %>% 
+  select(budget, gross, genres) %>% 
+  filter(budget<3e+08) %>% 
+  ggplot(aes(x=budget, y=gross)) +
+  geom_point( 
+    color="black",
+        fill="#69b3a2",
+        shape=22,
+        alpha=0.5,
+        size=1,
+        stroke = 1
+        ) +
+  geom_smooth()+
+  labs(x = "Budget",
+       y = "Gross",
+       title = "Budget and Gross Explore") +
+  theme(axis.title.x = element_text(size = 14),
+        axis.title.y = element_text(size = 14),
+        plot.title = element_text(size = 14))
+```
+
+In this plot, we can see that most budget are less than 2e+08 dollar. And we can see an approximately positive association between Budget and Gross. It makes sense. More budget can make sure the quality of the movie in some extent, which will be more likely to achieve success in box office. Finally, high gross can reflect its success.
 
 
 ## Formal Analysis

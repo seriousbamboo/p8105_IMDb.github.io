@@ -23,6 +23,7 @@
 <link href="site_libs/tocify-1.9.1/jquery.tocify.css" rel="stylesheet" />
 <script src="site_libs/tocify-1.9.1/jquery.tocify.js"></script>
 <script src="site_libs/navigation-1.1/tabsets.js"></script>
+<script src="site_libs/navigation-1.1/codefolding.js"></script>
 <link href="site_libs/highlightjs-9.12.0/default.css" rel="stylesheet" />
 <script src="site_libs/highlightjs-9.12.0/highlight.js"></script>
 <link href="site_libs/anchor-sections-1.0/anchor-sections.css" rel="stylesheet" />
@@ -261,6 +262,9 @@ $(document).ready(function () {
 </style>
 
 <!-- code folding -->
+<style type="text/css">
+.code-folding-btn { margin-bottom: 4px; }
+</style>
 
 
 
@@ -367,13 +371,16 @@ div.tocify {
   <a href="about.html">About page</a>
 </li>
 <li>
-  <a href="final_report.html">Report</a>
+  <a href="final_report.html">Exploratort Analysis</a>
 </li>
 <li>
-  <a href="https://gou29.shinyapps.io/p8015_final_shinyapp/">
-    <span class="fa fa-chart-bar fa-lg"></span>
-     
-  </a>
+  <a href="https://gou29.shinyapps.io/p8015_final_shinyapp/">Reactive Explore!</a>
+</li>
+<li>
+  <a href="model.html">Model</a>
+</li>
+<li>
+  <a href="final_report.html">Report</a>
 </li>
 <li>
   <a href="https://github.com/seriousbamboo/p8105_IMDb.github.io">
@@ -387,6 +394,14 @@ div.tocify {
 </div><!--/.navbar -->
 
 <div class="fluid-row" id="header">
+
+<div class="btn-group pull-right">
+<button type="button" class="btn btn-default btn-xs dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><span>Code</span> <span class="caret"></span></button>
+<ul class="dropdown-menu" style="min-width: 50px;">
+<li><a id="rmd-show-all-code" href="#">Show All Code</a></li>
+<li><a id="rmd-hide-all-code" href="#">Hide All Code</a></li>
+</ul>
+</div>
 
 
 
@@ -404,8 +419,8 @@ div.tocify {
 <div id="what-is-box-office" class="section level1">
 <h1>What is box office</h1>
 <p>Here is a short video to tell us what is box office?</p>
-<p><img src="./download" style="width:75%"></p>
-<p><a href="https://www.youtube.com/watch?v=XBR_KwTK25Q">Box office</a></p>
+<p><img src="download.png" style="width:75%"></p>
+<p><a href="https://www.youtube.com/watch?v=XBR_KwTK25Q">Link</a></p>
 </div>
 <div id="what-we-do" class="section level1">
 <h1>What we do</h1>
@@ -471,6 +486,11 @@ $(document).ready(function () {
 </script>
 
 <!-- code folding -->
+<script>
+$(document).ready(function () {
+  window.initializeCodeFolding("hide" === "show");
+});
+</script>
 
 <script>
 $(document).ready(function ()  {

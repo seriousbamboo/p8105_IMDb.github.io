@@ -42,9 +42,9 @@ Given the scenario of social distancing and temporary closure of movie theaters 
 - Is director a significant predictor of Gross?
 - the crude relationship between number of reviews and Gross
 
-<img src = "images/theaters.png" style = "width:100%"> 
 
-###### Image: REUTERS/Mario Anzuon
+
+
 
 # Data
 
@@ -52,13 +52,16 @@ The main dataset for our project is a combined dataset from dataset on Kaggle an
 
 # Findings
 
+Genres really really don't matter in a broad scale, as long as the movie has a popular genre. Action, adventure and family are the top three genres that can ignite the gross. Surprisingly, family movie is another guarantee of the gross since family movies have a broader audiences. Horror, documentary and drama have the negative effect on gross.
 
-
-# Report
-
+The most influential factor that positively influence the gross is the number of genres. Other than the number of genres, factors that positively influence, with a great magnitude, the gross are number of critic for reviews and number of users for reviews. Ironically, IMDB scores negatively influence the gross dramatically. Why is? We believe that there exists an inconsistency between score and the gross, since none of the score related factors provides a strong and positive effect on gross. Such inconsistency may because only limited people actually score the movie.
 
 
 # Website Navigation
+- **Reactive Explore!**: use Shiny to find relationship between your OWN SELECTION of variables
+- **Exploratory Analysis**: Crude association and interpretation
+- **Model**: Detailed Linear Model and Test for assumptions
+- **Report**: Final report, Enjoy!
 
 
 # Contributors

@@ -16,9 +16,9 @@ Our project aims to provide a "Handbook to movie producers"
 
 Here is a short video to tell us what is box office?
 
-<img src="./download" style="width:75%">
+<img src="download.png" style="width:75%">
 
-[Box office](https://www.youtube.com/watch?v=XBR_KwTK25Q)
+[Link](https://www.youtube.com/watch?v=XBR_KwTK25Q)
 
 
 # What we do
