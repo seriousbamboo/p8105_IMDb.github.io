@@ -1,5 +1,5 @@
 ---
-title: "P8105_IMDb"
+title: "MOVIE \"ENCYCLOPEDIA\""
 output: 
   html_document:
     toc: true
