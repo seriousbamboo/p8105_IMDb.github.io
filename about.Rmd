@@ -6,7 +6,6 @@ output:
     toc_float: true
 ---
 # Overview
-This is the about page
 
 Our project aims to provide a "Handbook to movie producers"
 
