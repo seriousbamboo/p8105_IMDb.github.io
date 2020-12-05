@@ -1,0 +1,362 @@
+---
+title: "Model"
+output:
+  html_document:
+    df_print: paged
+---
+
+```{r message=FALSE, warning=FALSE, include=FALSE}
+library(tidyverse)
+library(stringr)
+library(reshape2)
+library(arsenal)
+```
+
+```{r, warning=FALSE, echo = FALSE, message=FALSE}
+#Import cleaned data
+imdb_model = 
+  read_csv("./data/imdb_model.csv")
+
+imdb_model = 
+  imdb_model %>%
+  mutate(
+    num_genres = rowSums(imdb_model[,13:36]),
+    mult_genre = ifelse(num_genres >1, 1, 0)
+  )
+
+imdb_model_genre = 
+  imdb_model %>% 
+  select(gross, Action: Film.Noir)
+
+imdb_model_no_genre = 
+  imdb_model %>% 
+  select(-(Action: Film.Noir))
+```
+
+## Overview
+
+We aimed to investigating factors that associated with the gross and how these factors influenced the gross. We hoped to construct a robust model that may potentially guide film industry investors to make wise decisions after the pandemic. 
+
+After correlation matrices, genres in general didn't have strong associations with the gross but disturbed the effect of other predictors (not shown). Thus, we decided to build single linear regression models with stratification of genres and presented in form of [interactive plot](https://gou29.shinyapps.io/p8015_final_shinyapp/).
+
+Since the exploratory analyses and SLR models didn't provide much information, we decided to build the multiple linear regression model, from the full model, without a predetermined hypothesis. Meanwhile, in a situation of investing, genres are usually predetermined. Thus, we decided to build two models: model 1 contained predictors other than genres and model 2 contained genres only. 
+
+We used a special stepwise regression method to find the best model. A general Stepwise regression is a "step by step" method to select predictors which have higher AIC scores. However, rather than comparing variables' AIC, our method based on the comparison of each model's accuracy and it will provide a better model than traditional AIC stepwise regression. Finally, we presented two final models in the end of the section and discussed some interesting discoveries based on our models.
+
+
+```{r, warning=FALSE, include=FALSE, message=FALSE}
+#function to plot heatmap
+reorder_cormat <- function(cormat){
+# Use correlation between variables as distance
+dd <- as.dist((1-cormat)/2)
+hc <- hclust(dd)
+cormat <-cormat[hc$order, hc$order]
+}
+
+ get_upper_tri <- function(cormat){
+    cormat[lower.tri(cormat)]<- NA
+    return(cormat)
+  }
+```
+
+
+## Heatmap Plots of Correlation
+
+### Heatmap for Genres
+
+```{r, warning=FALSE, echo = FALSE, message=FALSE}
+#heatmap for genre
+cor.mat.heat.genre <- round(cor(imdb_model_genre),2)
+melted_cormat.genre <- melt(cor.mat.heat.genre)
+
+cor.mat.heat.genre <- reorder_cormat(cor.mat.heat.genre)
+upper_tri.heat.genre <- get_upper_tri(cor.mat.heat.genre)
+
+# Melt the correlation matrix
+melted_cormat_up_genre <- melt(upper_tri.heat.genre, na.rm = TRUE)
+
+# Create a ggheatmap
+ggheatmap_genre =
+  ggplot(melted_cormat_up_genre, aes(Var2, Var1, fill = value))+
+  geom_tile(color = "white")+
+  scale_fill_gradient2(low = "blue", high = "red", mid = "white", 
+    midpoint = 0, limit = c(-1,1), space = "Lab", 
+    name="Pearson\nCorrelation") +
+  theme_minimal()+ # minimal theme
+  theme(axis.text.x = element_text(angle = 90, 
+    size = 10, hjust = 1, vjust = 0))+
+  coord_fixed()+
+  labs(
+    title = "Figure 1. Heatmap of Gross and Genres",
+    x = "",
+    y = ""
+  )
+
+res_cor_up_genre = 
+melted_cormat_up_genre %>%
+  filter(
+    Var1 == "gross"
+  ) %>%
+  pivot_wider(
+    names_from = Var2,
+    values_from = value
+  ) %>%
+  rename(
+    " "=Var1
+  ) %>%
+  select(
+    -gross
+  )
+
+ggheatmap_genre
+```
+
+```{r,echo = FALSE}
+res_cor_up_genre
+```
+
+Figure 1 presented the correlation matrix between various genres and gross. From the heatmap, we can intuitively observe associations between genres and gross. Overall, we didn't observe any strong connections between genres and gross. Among all genres, adventure, fantasy, animation, family, action and science fiction have stronger associations with gross and they may contribute to the model later. 
+
+
+### Heatmap for non-Genre Factors 
+
+```{r, warning=FALSE, echo=FALSE, message=FALSE}
+#heatmap for no genre
+cor.mat.heat.nogenre <- round(cor(imdb_model_no_genre,use = "complete.obs"),2)
+melted_cormat.nogenre <- melt(cor.mat.heat.nogenre)
+
+cor.mat.heat.nogenre <- reorder_cormat(cor.mat.heat.nogenre)
+upper_tri.heat.nogenre <- get_upper_tri(cor.mat.heat.nogenre)
+
+# Melt the correlation matrix
+melted_cormat_up_nogenre <- melt(upper_tri.heat.nogenre, na.rm = TRUE)
+
+# Create a ggheatmap
+ggheatmap_nogenre =
+  ggplot(melted_cormat_up_nogenre, aes(Var2, Var1, fill = value))+
+  geom_tile(color = "white")+
+  scale_fill_gradient2(low = "blue", high = "red", mid = "white", 
+    midpoint = 0, limit = c(-1,1), space = "Lab", 
+    name="Pearson\nCorrelation") +
+  theme_minimal()+ # minimal theme
+  theme(axis.text.x = element_text(angle = 90, 
+    size = 10, hjust = 1, vjust = 0))+
+  coord_fixed()+
+  labs(
+    title = "Figure 2. Heatmap of Gross and non-Genre Factors",
+    x = "",
+    y = ""
+  )
+
+res_cor_up_nogenre = 
+melted_cormat_up_nogenre %>%
+  filter(
+    Var1 == "gross"
+  ) %>%
+  pivot_wider(
+    names_from = Var2,
+    values_from = value
+  ) %>%
+  rename(
+    " "=Var1
+  ) %>%
+  select(
+    -gross
+  )
+
+ggheatmap_nogenre
+
+```
+
+```{r,echo = FALSE, , fig.cap= "Table 2. Correlations between Gross and non-Genre Factors"}
+res_cor_up_nogenre
+```
+
+Figure 2 presented the correlation matrix between other factors and gross. We observed a better and stronger associations. Among all predictors, number of voted users, number of users for reviews, duration, IMDB scores, budget and number of genres have stronger associations with gross and they might contribute to the model later. 
+
+
+## Stratified Single Linear Regression Model
+
+From the heatmap, we observed a generally weak association between genres and gross. Therefore, we decided to perform single linear regression between gross and each predictor to discover possible significant predictors. Detailed plots and model summaries were located [HERE](https://gou29.shinyapps.io/p8015_final_shinyapp/). Interestingly, the majority of single linear regression models was significant. Thus, unfortunately, it didn't provide much information regarding the building of our final models and we decided build the model from the full model. 
+
+## Model Building
+
+We applied `regsubsets` from `leap` library to conduct the regression. Basically, this function constructs the null model first (contains only intercept) and combines various of variables to form an exhaustive subset of models. Within the subset, the function will compare the adjusted R2 and find the best combination of predictors. It is a better method than stepwise selection but needs a longer calculation time. Also, since cross validation has been done within the function, we don't need to perform the cross validation. Because we don't have many features, we decided to utilize this method to select the best model.
+
+### Model without Genres
+
+```{r, warning=FALSE, include=FALSE, message=FALSE}
+#model without genres 
+lm.leaps_no_genre = 
+  leaps::regsubsets(gross~., data = imdb_model_no_genre, nvmax = 8,
+                     method = "seqrep")
+sum.no_genre = summary(lm.leaps_no_genre)
+```
+
+```{r,echo = FALSE}
+plot(sum.no_genre$adjr2,xlab='No. of Variables',ylab='Adj. R^2',type='l', main = "Figure 3. Plot of Number of Variables for non-Genre Model")
+```
+```{r,echo = FALSE}
+plot(lm.leaps_no_genre,scale = "adjr2", main = "Figure 4. Plot of Important Variables for non-Genre Model")
+```
+  
+  Figure 3 showed how many variables should the best model included. In our case, including 8 variables will make our model reach the highest accuracy (highest adjusted R2). 
+  
+  From Figure 4, we can conclude our model should include following variables: number of critics for reviews, Facebook likes of the director, Facebook likes of the primary actor/actress, number of voted users, total Facebook likes of the cast, number of users for reviews, IMDB score and the number of genres.
+  
+#### non-Genre Model
+
+```{r, warning=FALSE, include=FALSE, message=FALSE}
+#final model according to the selection
+lm.no_genre = lm(gross ~ num_critic_for_reviews + director_facebook_likes + actor_1_facebook_likes + num_voted_users + cast_total_facebook_likes +  num_user_for_reviews + imdb_score + num_genres, data = na.omit(imdb_model_no_genre))
+```
+
+```{r,echo = FALSE, fig.cap= "Table 3. Estimates and P.values of the non-Genre Model"}
+lm.no_genre %>%
+  broom::tidy() %>%
+  select(
+    term, estimate, p.value
+  ) %>%
+  knitr::kable(digits = 3)
+```
+
+
+
+### Model of Genres
+
+```{r, warning=FALSE, include=FALSE, message=FALSE}
+#stepwise with genres
+lm.leaps_genre = leaps::regsubsets(gross~., data = imdb_model_genre, nvmax = 8,
+                     method = "seqrep")
+sum.genre = summary(lm.leaps_genre)
+```
+
+```{r,echo = FALSE}
+plot(sum.genre$adjr2,xlab='No. of Variables',ylab='Adj. R^2',type='l',main = "Figure 5. Plot of Number of Variables for Genre Model")
+plot(lm.leaps_genre,scale = "adjr2", main = "Figure 6. Plot of Important Varialbes for Genre Model")
+```
+  
+Similarly, 8 variables should be included in our model according to Figure 5. From the Figure 6, we can conclude Action, Adventure, Fantasy, Sci-Fiction, Family, Drama, Horror and Documentary are important factors that influence the gross. However, since the accuracy (adjusted R2) is small, genre in general may not be an important factor to consider.
+
+#### Genre Model
+
+```{r, warning=FALSE, include=FALSE, message=FALSE}
+lm.genre = 
+  lm(gross ~ Action+ Adventure + Fantasy + Sci.Fi + Family + Drama + Horror + Documentary, data = na.omit(imdb_model_genre))
+```
+
+```{r,echo = FALSE}
+lm.genre %>%
+  broom::tidy() %>%
+  select(
+    term, estimate, p.value
+  ) %>%
+  knitr::kable(digits = 3)
+```
+
+
+
+
+
+
+
+
+## Diagnosis
+```{r, echo= FALSE, , fig.cap= "Figure 7-10. Plots to Check the Assumptions after Transformation"}
+par(mfrow=c(2,2))
+plot(lm.no_genre)
+```
+
+
+Above provides assumption checking of the non-genre model. Since the non-Genre Model has a much higher accuracy, we check the assumption of it. Unfortunately, plots are not satisfactory. 
+
+* A cluster of data locates mainly on the left and is not randomly distributed for the Residuals vs Fitted plot. However, other clear pattern is not observed, meaning that linear regression is still appropriate. 
+
+* Normal QQ plot provides insight of its normality and the majority of our model lied on the line, which is acceptable. 
+
+* For scale location plot, a cluster of data aggregates together showed the equal variance assumption was violated. 
+
+* Lastly, we can observe some outliers that are influential from the Residuals vs Leverage plot.
+
+Since nearly all the assumptions were violated in some extent, we decided to perform a box-cox transformation.
+
+### Box-Cox Transformation
+
+Box-Cox transformation is another common method to normalize the data. Detailed information is provided [here](https://rss.onlinelibrary.wiley.com/doi/abs/10.1111/j.2517-6161.1964.tb00553.x). We performed Box-Cox transformation to our non-Genre model and check the assumptions again. 
+
+```{r, echo= FALSE, fig.cap= "Figure 11. Fitted Lambda for Box-Cox Transformation."}
+#find lambda for our model.
+boxcox.lm = MASS::boxcox(lm.no_genre)
+lambda <- boxcox.lm$x[which.max(boxcox.lm$y)]
+```
+
+Above provides the fitted lambda for the transformation and we transformed our model based on this lambda, which was `r round(lambda, digits = 3)`. 
+
+### Assumption Checking after Transformation
+
+```{r, echo=FALSE , fig.cap= "Figure 12-15. Plots to Check the Assumptions after Transformation"}
+lm.no_genre_lambda = lm(gross^lambda ~ num_critic_for_reviews + director_facebook_likes + actor_1_facebook_likes + num_voted_users + cast_total_facebook_likes +  num_user_for_reviews + imdb_score + num_genres, data = na.omit(imdb_model_no_genre))
+par(mfrow=c(2,2))
+plot(lm.no_genre_lambda)
+```
+
+Above presents the check of assumption after transformation. In general, Box-Cox transformation provided a quite satisfactory transformation to our model. 
+
+* A cluster of data still exists on the left and is more randomly distributed compared the plot before transformation.However, a long "tail" on the right suggests a strong influence of outliers. 
+
+* Transformed model lies on the line perfectly. 
+
+* For scale location plot, a cluster of data aggregates together but the trend line is more horizontal than the previous scale location plot, showing that the homoskedasticity (equal spread of the data) is checked for the majority of the data. 
+
+* Lastly, we can still observe some outliers that are influential from the Residuals vs Leverage plot.
+
+
+
+
+## Discussion
+
+### Findings
+
+#### Regarding the Genre Model:
+
+* Overall, genres really really don't matter, as long as the movie has a popular genre. There is a great overlap between the popular genres and the important genres in our genre model, but the accuracy is weak.
+
+* From the genre model, action, adventure and family are the top three genres that can ignite the gross. We propose that the main audiences of movie theater are young people who are interested in visual effects or special effects. Surprisingly, family movie is another guarantee of the gross since family movies have a broader audiences. After all, watching movie together has became a family event for a long time. 
+
+* Horror, documentary and drama have the negative effect on gross. We suppose the reason that genres with a limited scope of audiences will negatively affect on gross. These three genres usually keep audiences from entering the theater. (PS: I personally have never watched these three genres of movies in a movie theater.)
+
+The Genre model may not be referential that much since nowadays, a film usually contains elements from multiple genres and it will be getting harder to define one film's genre in the future. Still, the model provides some insights. After all, horror movie indeed keep some audiences (like me) away from the theater. 
+
+
+#### Regarding the non-Genre Model:
+
+Overall, non-genre model can provide much more insights than the genre only model since it is more accurate. However, the coefficients are really surprising. 
+
+* The most influential factor that positively influence the gross is the number of genres. In other words, the more genres (or more elements) are included in the movie, the more successful of the movie will be. It provides an interesting insight that the majority of audiences is much more interested in the film itself, rather than the stars or the production. Telling a good story is vitally important.    
+
+* Other than the number of genres, factors that positively influence, with a great magnitude, the gross are number of critic for reviews and number of users for reviews. These two factors, to a large extend, represent the popularity of a movie and emphasizing the power of marketing. Marketing, in any industries, is nowadays an essential factor on determining the sales, especially with the fast growing of social media. However, since our data was collected from IMDB and either the number of critics and the number of users was cumulative, marketing of a successful movie should be a long term efforts. 
+
+* Lastly, and ironically, IMDB scores negatively influence the gross dramatically. Why is? We believe that there exists an inconsistency between score and the gross, since none of the score related factors provides a strong and positive effect on gross. Such inconsistency may because only limited people actually score the movie.
+
+### Limitation
+
+Even though we performed Box-Cox transformation to make our non-genre model better satisfy the assumptions for regression, the model still didn't satisfy the assumptions well. It may implies a complicated model should be utilized, like machine learning algorithms. In addition to the method selection, the data should contain more features, like inflation rate, to provide more insights in model building. 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

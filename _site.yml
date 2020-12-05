@@ -5,6 +5,8 @@ navbar:
   right:
     - text: "About page"
       href: about.html
+    - text: "Model"
+      href: model.html
     - text: "Report"
       href: final_report.html
     - icon: fa-chart-bar fa-lg
