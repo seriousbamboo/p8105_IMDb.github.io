@@ -1,0 +1,91 @@
+---
+title: "corr_plot"
+author: "Yatong Feng"
+output: html_document
+---
+
+```{r setup, message = F, include = F}
+library(tidyverse)
+library(corrplot)
+
+knitr::opts_chunk$set(
+  message = F,
+  warning = F
+)
+theme_set(theme_minimal() + theme(legend.position = "bottom"))
+options(
+  ggplot2.continuous.colour = "viridis",
+  ggplot2.continuous.fill = "viridis"
+)
+scale_colour_discrete = scale_color_viridis_d
+scale_fill_discrete = scale_fill_viridis_d
+```
+
+```{r, include = F}
+imdb_raw = 
+  read_csv("../data/movie_metadata.csv") %>% 
+  as.data.frame() %>% 
+  drop_na(movie_title)
+
+imdb = 
+  imdb_raw %>%
+  as.data.frame() %>% 
+  select(
+    -color, -actor_2_name, -actor_2_facebook_likes, -actor_3_name, -actor_3_facebook_likes, -facenumber_in_poster, -movie_imdb_link, -content_rating, -plot_keywords
+  ) %>%
+  drop_na(gross) %>% 
+  mutate(movie_title = str_replace(movie_title,"\\?$",""))
+
+rownames(imdb) = c(1:dim(imdb)[1])
+```
+
+```{r, include = F}
+corr_raw_df = 
+  imdb %>% 
+  select(num_critic_for_reviews:gross, num_voted_users:num_user_for_reviews, budget, imdb_score:movie_facebook_likes) %>% drop_na()
+```
+
+```{r, include = F}
+corr_df = cor(corr_raw_df)
+
+cor.mtest <- function(mat, ...) {
+    mat <- as.matrix(mat)
+    n <- ncol(mat)
+    p.mat<- matrix(NA, n, n)
+    diag(p.mat) <- 0
+    for (i in 1:(n - 1)) {
+        for (j in (i + 1):n) {
+            tmp <- cor.test(mat[, i], mat[, j], ...)
+            p.mat[i, j] <- p.mat[j, i] <- tmp$p.value
+        }
+    }
+  colnames(p.mat) <- rownames(p.mat) <- colnames(mat)
+  p.mat
+}
+
+p.mat <- cor.mtest(corr_raw_df)
+```
+
+### Correlation plot description:
+
+- find the correlation relationship among those numeric factors
+- point size: significant
+- cross：not significant
+
+```{r}
+corr_plt = 
+  corrplot(corr_df, 
+           method="circle", 
+           type="lower", 
+           order="hclust", 
+           tl.col="black", 
+           tl.srt=45, 
+           p.mat = p.mat, 
+           sig.level = 0.01)
+```
+
+
+
+
+
+

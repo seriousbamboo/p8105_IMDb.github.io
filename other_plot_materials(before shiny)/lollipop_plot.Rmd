@@ -1,0 +1,89 @@
+---
+title: "lollipop_plot"
+author: "Yatong Feng"
+output: 
+  html_document:
+    toc: true
+    toc_float: true
+---
+
+```{r setup, message = F, include = F}
+library(tidyverse)
+library(ggalt)
+library(plotly)
+
+
+knitr::opts_chunk$set(
+  message = F,
+  warning = F
+)
+theme_set(theme_minimal() + theme(legend.position = "bottom"))
+options(
+  ggplot2.continuous.colour = "viridis",
+  ggplot2.continuous.fill = "viridis"
+)
+scale_colour_discrete = scale_color_viridis_d
+scale_fill_discrete = scale_fill_viridis_d
+```
+
+```{r, include = F}
+imdb_raw = 
+  read_csv("../data/movie_metadata.csv") %>% 
+  as.data.frame() %>% 
+  drop_na(movie_title)
+```
+
+
+```{r, include = F}
+imdb = 
+  imdb_raw %>%
+  as.data.frame() %>% 
+  select(
+    -color, -actor_2_name, -actor_2_facebook_likes, -actor_3_name, -actor_3_facebook_likes, -facenumber_in_poster, -movie_imdb_link, -content_rating, -plot_keywords
+  ) %>%
+  drop_na(gross) %>% 
+  mutate(movie_title = str_replace(movie_title,"\\?$",""))
+
+rownames(imdb) = c(1:dim(imdb)[1])
+```
+
+
+```{r, include = F}
+lolli_raw_df = 
+  imdb %>% 
+  select(director_name, gross) %>% 
+  group_by(director_name) %>% 
+  summarise(total_gross = sum(gross),
+            max_gross = max(gross),
+            min_gross = min(gross)) %>% 
+  arrange(desc(total_gross))
+
+lolli_df = lolli_raw_df[1:10,] %>% mutate(id = 1:10)
+
+```
+
+
+### Lollipop Plot description:
+
+- select movie director with top 10 total gross
+- blue point: lowest gross
+- pink point: highest gross
+- point size: gross
+
+
+```{r, warrning = F}
+lolli_plt = 
+  lolli_df %>% 
+  ggplot(aes(x=max_gross,xend=min_gross,y=director_name))+
+  geom_dumbbell(colour_x = "#FFB6C1",colour_xend = "#4169E1",size_x = 2,size_xend = 2,size=0.5,color="gray")+
+  geom_point(aes(x=max_gross,y=director_name,size=max_gross),alpha=0.5,color="#FFB6C1")+
+  geom_point(aes(x=min_gross,y=director_name,size=min_gross),alpha=0.5,color="#4169E1")+
+  theme_light()+
+  theme(panel.grid.minor.x =element_blank(),
+        legend.position = c("none")
+        )+
+  xlab("Min & Max Gross")
+
+ggplotly(lolli_plt)
+```
+
