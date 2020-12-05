@@ -5,8 +5,8 @@ navbar:
   right:
     - text: "About page"
       href: about.html
-    - text: "Exploratort Analysis"
-      href: final_report.html
+    - text: "Exploratory Analysis"
+      href: Exploratory.html
     - text: "Reactive Explore!"
       href: https://gou29.shinyapps.io/p8015_final_shinyapp/
     - text: "Model"
