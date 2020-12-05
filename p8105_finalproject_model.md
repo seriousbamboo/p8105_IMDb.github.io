@@ -7,33 +7,21 @@ Zhe Chen, Yatong Feng
 
 ``` r
 library(tidyverse)
-```
-
-    ## ── Attaching packages ────────────────────────────────────── tidyverse 1.3.0 ──
-
-    ## ✓ ggplot2 3.3.2     ✓ purrr   0.3.4
-    ## ✓ tibble  3.0.3     ✓ dplyr   1.0.2
-    ## ✓ tidyr   1.1.2     ✓ stringr 1.4.0
-    ## ✓ readr   1.3.1     ✓ forcats 0.5.0
-
-    ## ── Conflicts ───────────────────────────────────────── tidyverse_conflicts() ──
-    ## x dplyr::filter() masks stats::filter()
-    ## x dplyr::lag()    masks stats::lag()
-
-``` r
 library(stringr)
 ```
 
-### import data
+### import and cleaning data
 
 ``` r
-imdb_raw = read_csv("./movie_metadata.csv")
+imdb_raw = read_csv("./data/movie_metadata.csv")
 ```
 
 ``` r
+#data cleaning 
 imdb = imdb_raw %>%
   as.data.frame() %>% 
   drop_na(movie_title) %>%
+#keep only interested variables 
   select(
     -color, -actor_2_name, -actor_2_facebook_likes, -actor_3_name, -actor_3_facebook_likes, -facenumber_in_poster, -movie_imdb_link, -content_rating, -plot_keywords
   ) %>%
@@ -43,6 +31,7 @@ rownames(imdb) = c(1:dim(imdb)[1])
 ```
 
 ``` r
+#separate genres into multiple columns
 a = imdb$genres
 genres_list = unique(unlist(str_split(a, "[|]")))
 
@@ -61,29 +50,227 @@ rownames(niubility) = c(1:dim(imdb)[1])
 imdb_after_genre = data.frame(imdb, niubility)
 ```
 
+### Model building
+
 ``` r
 imdb_model = 
   imdb_after_genre %>% 
   select(num_critic_for_reviews:gross, num_voted_users:num_user_for_reviews, budget, imdb_score: Film.Noir)
+```
 
-lm = lm(gross ~., data = imdb_model)
-# summary(lm)
+``` r
+#build a comprehensive model 
+lm = lm(gross ~., data = na.omit(imdb_model))
+lm.step = step(lm, direction = "both", trace = FALSE)
+summary(lm.step)
+```
 
+    ## 
+    ## Call:
+    ## lm(formula = gross ~ num_critic_for_reviews + duration + director_facebook_likes + 
+    ##     actor_1_facebook_likes + num_voted_users + cast_total_facebook_likes + 
+    ##     num_user_for_reviews + budget + imdb_score + movie_facebook_likes + 
+    ##     Action + Adventure + Fantasy + Romance + Animation + Comedy + 
+    ##     Family + Drama + History + Sport + Crime + Horror + Music, 
+    ##     data = na.omit(imdb_model))
+    ## 
+    ## Residuals:
+    ##        Min         1Q     Median         3Q        Max 
+    ## -367559993  -22281349   -2982334   15899760  471445614 
+    ## 
+    ## Coefficients:
+    ##                             Estimate Std. Error t value Pr(>|t|)    
+    ## (Intercept)               -1.721e+07  7.074e+06  -2.432 0.015044 *  
+    ## num_critic_for_reviews     7.698e+04  1.026e+04   7.503 7.71e-14 ***
+    ## duration                   3.664e+05  4.201e+04   8.724  < 2e-16 ***
+    ## director_facebook_likes   -8.946e+02  2.663e+02  -3.360 0.000787 ***
+    ## actor_1_facebook_likes    -1.483e+03  1.566e+02  -9.468  < 2e-16 ***
+    ## num_voted_users            1.897e+02  9.910e+00  19.140  < 2e-16 ***
+    ## cast_total_facebook_likes  1.409e+03  1.299e+02  10.844  < 2e-16 ***
+    ## num_user_for_reviews       1.957e+04  3.290e+03   5.948 2.97e-09 ***
+    ## budget                     5.267e-03  3.457e-03   1.523 0.127737    
+    ## imdb_score                -3.283e+06  9.527e+05  -3.446 0.000574 ***
+    ## movie_facebook_likes      -8.014e+01  5.324e+01  -1.505 0.132346    
+    ## Action                     1.029e+07  2.118e+06   4.859 1.23e-06 ***
+    ## Adventure                  1.514e+07  2.370e+06   6.388 1.89e-10 ***
+    ## Fantasy                    6.179e+06  2.489e+06   2.483 0.013087 *  
+    ## Romance                    6.644e+06  1.976e+06   3.363 0.000780 ***
+    ## Animation                  2.049e+07  4.398e+06   4.659 3.29e-06 ***
+    ## Comedy                     8.142e+06  1.921e+06   4.239 2.30e-05 ***
+    ## Family                     3.089e+07  3.181e+06   9.710  < 2e-16 ***
+    ## Drama                     -1.351e+07  1.969e+06  -6.860 8.03e-12 ***
+    ## History                   -8.309e+06  4.138e+06  -2.008 0.044722 *  
+    ## Sport                      1.079e+07  4.056e+06   2.661 0.007824 ** 
+    ## Crime                     -5.989e+06  2.146e+06  -2.791 0.005287 ** 
+    ## Horror                    -8.673e+06  2.977e+06  -2.913 0.003596 ** 
+    ## Music                      8.610e+06  3.952e+06   2.178 0.029432 *  
+    ## ---
+    ## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+    ## 
+    ## Residual standard error: 47270000 on 3790 degrees of freedom
+    ## Multiple R-squared:  0.5487, Adjusted R-squared:  0.546 
+    ## F-statistic: 200.4 on 23 and 3790 DF,  p-value: < 2.2e-16
+
+``` r
+summary(lm)
+```
+
+    ## 
+    ## Call:
+    ## lm(formula = gross ~ ., data = na.omit(imdb_model))
+    ## 
+    ## Residuals:
+    ##        Min         1Q     Median         3Q        Max 
+    ## -368441236  -22116818   -3165155   15821138  470437243 
+    ## 
+    ## Coefficients: (1 not defined because of singularities)
+    ##                             Estimate Std. Error t value Pr(>|t|)    
+    ## (Intercept)               -1.479e+07  8.595e+06  -1.721 0.085361 .  
+    ## num_critic_for_reviews     7.777e+04  1.046e+04   7.436 1.28e-13 ***
+    ## duration                   3.856e+05  4.294e+04   8.980  < 2e-16 ***
+    ## director_facebook_likes   -8.849e+02  2.668e+02  -3.316 0.000921 ***
+    ## actor_1_facebook_likes    -1.478e+03  1.568e+02  -9.432  < 2e-16 ***
+    ## num_voted_users            1.899e+02  9.956e+00  19.070  < 2e-16 ***
+    ## cast_total_facebook_likes  1.406e+03  1.301e+02  10.810  < 2e-16 ***
+    ## num_user_for_reviews       1.958e+04  3.314e+03   5.909 3.75e-09 ***
+    ## budget                     5.525e-03  3.467e-03   1.594 0.111120    
+    ## imdb_score                -3.408e+06  9.681e+05  -3.520 0.000437 ***
+    ## aspect_ratio              -1.775e+06  2.285e+06  -0.777 0.437270    
+    ## movie_facebook_likes      -7.592e+01  5.359e+01  -1.417 0.156647    
+    ## Action                     1.085e+07  2.243e+06   4.836 1.38e-06 ***
+    ## Adventure                  1.549e+07  2.391e+06   6.479 1.05e-10 ***
+    ## Fantasy                    5.824e+06  2.519e+06   2.312 0.020854 *  
+    ## Sci.Fi                    -3.339e+06  2.571e+06  -1.299 0.194125    
+    ## Thriller                   1.802e+06  2.196e+06   0.820 0.412034    
+    ## Romance                    6.656e+06  2.005e+06   3.320 0.000910 ***
+    ## Animation                  2.109e+07  4.432e+06   4.758 2.02e-06 ***
+    ## Comedy                     8.200e+06  2.085e+06   3.933 8.54e-05 ***
+    ## Family                     3.112e+07  3.213e+06   9.684  < 2e-16 ***
+    ## Musical                   -7.326e+05  4.959e+06  -0.148 0.882567    
+    ## Mystery                   -2.013e+06  2.770e+06  -0.727 0.467446    
+    ## Western                   -7.145e+06  6.206e+06  -1.151 0.249659    
+    ## Drama                     -1.323e+07  2.032e+06  -6.509 8.58e-11 ***
+    ## History                   -7.180e+06  4.474e+06  -1.605 0.108588    
+    ## Sport                      1.042e+07  4.138e+06   2.518 0.011853 *  
+    ## Crime                     -7.084e+06  2.298e+06  -3.083 0.002065 ** 
+    ## Horror                    -8.474e+06  3.025e+06  -2.801 0.005119 ** 
+    ## War                       -4.852e+06  4.209e+06  -1.153 0.249158    
+    ## Biography                 -1.022e+06  3.521e+06  -0.290 0.771679    
+    ## Music                      8.085e+06  3.997e+06   2.023 0.043151 *  
+    ## Documentary                7.636e+06  7.027e+06   1.087 0.277216    
+    ## News                              NA         NA      NA       NA    
+    ## Short                      7.500e+06  4.790e+07   0.157 0.875574    
+    ## Film.Noir                  1.443e+07  4.745e+07   0.304 0.761097    
+    ## ---
+    ## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+    ## 
+    ## Residual standard error: 47300000 on 3779 degrees of freedom
+    ## Multiple R-squared:  0.5496, Adjusted R-squared:  0.5455 
+    ## F-statistic: 135.6 on 34 and 3779 DF,  p-value: < 2.2e-16
+
+``` r
+#stepwise with genres
+imdb_model_genre = 
+  imdb_after_genre %>% 
+  select(gross, Action: Film.Noir)
+lm.genre = lm(gross~., data = na.omit(imdb_model_genre))
+lm.genre.step = step(lm.genre, direction = "both", trace = FALSE)
+summary(lm.genre.step)
+```
+
+    ## 
+    ## Call:
+    ## lm(formula = gross ~ Action + Adventure + Fantasy + Sci.Fi + 
+    ##     Thriller + Animation + Comedy + Family + Western + Drama + 
+    ##     Crime + Horror + Documentary, data = na.omit(imdb_model_genre))
+    ## 
+    ## Residuals:
+    ##        Min         1Q     Median         3Q        Max 
+    ## -139114219  -31548100  -15189398   17533529  628694023 
+    ## 
+    ## Coefficients:
+    ##              Estimate Std. Error t value Pr(>|t|)    
+    ## (Intercept)  49558456    2909594  17.033  < 2e-16 ***
+    ## Action       16483044    2757291   5.978 2.45e-09 ***
+    ## Adventure    33801930    2968613  11.386  < 2e-16 ***
+    ## Fantasy      17899967    3202829   5.589 2.43e-08 ***
+    ## Sci.Fi       14068427    3222074   4.366 1.29e-05 ***
+    ## Thriller     -4730149    2633742  -1.796  0.07257 .  
+    ## Animation    17737024    5447377   3.256  0.00114 ** 
+    ## Comedy       -9923569    2402421  -4.131 3.69e-05 ***
+    ## Family       12605875    3954611   3.188  0.00145 ** 
+    ## Western     -16156512    7675102  -2.105  0.03535 *  
+    ## Drama       -16744749    2406488  -6.958 3.99e-12 ***
+    ## Crime        -4846272    2815059  -1.722  0.08523 .  
+    ## Horror      -21421295    3683365  -5.816 6.49e-09 ***
+    ## Documentary -36122128    6880598  -5.250 1.60e-07 ***
+    ## ---
+    ## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+    ## 
+    ## Residual standard error: 61730000 on 4145 degrees of freedom
+    ## Multiple R-squared:  0.1893, Adjusted R-squared:  0.1868 
+    ## F-statistic: 74.47 on 13 and 4145 DF,  p-value: < 2.2e-16
+
+``` r
+#model without genre
+imdb_model_no_genre = 
+  imdb_model %>% 
+  select(-(Action: Film.Noir))
+lm.nogenre = lm(gross~., data = na.omit(imdb_model_no_genre))
+lm.nogenre.step = step(lm.nogenre, direction = "both", trace = FALSE)
+summary(lm.nogenre.step)
+```
+
+    ## 
+    ## Call:
+    ## lm(formula = gross ~ num_critic_for_reviews + duration + director_facebook_likes + 
+    ##     actor_1_facebook_likes + num_voted_users + cast_total_facebook_likes + 
+    ##     num_user_for_reviews + budget + imdb_score + aspect_ratio + 
+    ##     movie_facebook_likes, data = na.omit(imdb_model_no_genre))
+    ## 
+    ## Residuals:
+    ##        Min         1Q     Median         3Q        Max 
+    ## -426735021  -23198866   -9075737   13687276  486318162 
+    ## 
+    ## Coefficients:
+    ##                             Estimate Std. Error t value Pr(>|t|)    
+    ## (Intercept)                4.680e+07  7.971e+06   5.871 4.69e-09 ***
+    ## num_critic_for_reviews     7.814e+04  1.114e+04   7.011 2.78e-12 ***
+    ## duration                   1.602e+05  4.220e+04   3.796 0.000149 ***
+    ## director_facebook_likes   -1.293e+03  2.920e+02  -4.429 9.73e-06 ***
+    ## actor_1_facebook_likes    -1.717e+03  1.721e+02  -9.978  < 2e-16 ***
+    ## num_voted_users            2.375e+02  1.056e+01  22.482  < 2e-16 ***
+    ## cast_total_facebook_likes  1.615e+03  1.426e+02  11.323  < 2e-16 ***
+    ## num_user_for_reviews       1.359e+04  3.544e+03   3.835 0.000128 ***
+    ## budget                     1.335e-02  3.787e-03   3.526 0.000427 ***
+    ## imdb_score                -7.754e+06  9.594e+05  -8.082 8.47e-16 ***
+    ## aspect_ratio              -4.013e+06  2.462e+06  -1.630 0.103184    
+    ## movie_facebook_likes      -1.047e+02  5.818e+01  -1.800 0.071918 .  
+    ## ---
+    ## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+    ## 
+    ## Residual standard error: 52070000 on 3802 degrees of freedom
+    ## Multiple R-squared:  0.4507, Adjusted R-squared:  0.4492 
+    ## F-statistic: 283.6 on 11 and 3802 DF,  p-value: < 2.2e-16
+
+``` r
 imdb_model_clean = 
   imdb_model %>% 
   select(num_critic_for_reviews:num_user_for_reviews, imdb_score, Action:Fantasy, Romance:Family, Drama, Sport:Horror, Music)
+
+
 
 lm_clean = lm(gross ~., data = imdb_model_clean)
 plot(lm_clean)
 ```
 
-![](p8105_finalproject_model_files/figure-gfm/unnamed-chunk-5-1.png)<!-- -->![](p8105_finalproject_model_files/figure-gfm/unnamed-chunk-5-2.png)<!-- -->![](p8105_finalproject_model_files/figure-gfm/unnamed-chunk-5-3.png)<!-- -->![](p8105_finalproject_model_files/figure-gfm/unnamed-chunk-5-4.png)<!-- -->
+![](p8105_finalproject_model_files/figure-gfm/unnamed-chunk-8-1.png)<!-- -->![](p8105_finalproject_model_files/figure-gfm/unnamed-chunk-8-2.png)<!-- -->![](p8105_finalproject_model_files/figure-gfm/unnamed-chunk-8-3.png)<!-- -->![](p8105_finalproject_model_files/figure-gfm/unnamed-chunk-8-4.png)<!-- -->
 
 ``` r
 plot(lm_clean, which=4)
 ```
 
-![](p8105_finalproject_model_files/figure-gfm/unnamed-chunk-5-5.png)<!-- -->
+![](p8105_finalproject_model_files/figure-gfm/unnamed-chunk-8-5.png)<!-- -->
 
 ``` r
 Ci <- cooks.distance(lm_clean)
@@ -98,7 +285,7 @@ for (i in 1:4) {
 }
 ```
 
-![](p8105_finalproject_model_files/figure-gfm/unnamed-chunk-5-6.png)<!-- -->
+![](p8105_finalproject_model_files/figure-gfm/unnamed-chunk-8-6.png)<!-- -->
 
 ``` r
 summary(imdb_model_clean)
@@ -115,7 +302,7 @@ summary(imdb_model_clean)
     ##  actor_1_facebook_likes     gross           num_voted_users  
     ##  Min.   :     0.0       Min.   :      162   Min.   :      5  
     ##  1st Qu.:   696.2       1st Qu.:  5308592   1st Qu.:  15081  
-    ##  Median :  1000.0       Median : 25445749   Median :  46204  
+    ##  Median :  1000.0       Median : 25445749   Median :  46205  
     ##  Mean   :  7135.0       Mean   : 47576730   Mean   :  95498  
     ##  3rd Qu.: 12000.0       3rd Qu.: 61467500   3rd Qu.: 114043  
     ##  Max.   :260000.0       Max.   :533316061   Max.   :1676169  
@@ -154,14 +341,17 @@ summary(imdb_model_clean)
     ## 
 
 ``` r
-write_csv(imdb_model_clean,"imdb_model_clean.csv")
+write_csv(imdb_model_clean,"./data/imdb_model_clean.csv")
 ```
 
 ``` r
 str_model = imdb_model %>% janitor::clean_names() %>% drop_na()
 ```
 
+### Build model with stratification of genres
+
 ``` r
+#generate data frame for each genre
 genres_list = colnames(str_model)[13:length(colnames(str_model))][-22]
 for (genre in genres_list) {
   assign(paste0(genre, "_model_df"), str_model %>% 
@@ -173,6 +363,7 @@ for (genre in genres_list) {
 ```
 
 ``` r
+#apply regression model to each genre's data frame 
 get_lm <- function(genres){
   summary(get(paste0(genres, "_lm")))
 }

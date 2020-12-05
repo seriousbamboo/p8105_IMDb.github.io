@@ -18,8 +18,8 @@ Box-office prediction model based on IMDB
 
 ``` r
 library(tidyverse)
-imdb_raw = read_csv("movie_metadata.csv")
-imdb = read_csv("imdb_model_clean.csv")
+imdb_raw = read_csv("./data/movie_metadata.csv")
+imdb = read_csv("./data/imdb_model_clean.csv")
 #imdb_raw %>% 
   #group_by(country) %>% 
   #summarize(n = n()) %>% 

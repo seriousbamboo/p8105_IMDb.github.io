@@ -614,8 +614,8 @@ body {
 <h2 id="2-title">2． Title</h2>
 <p>Box-office prediction model based on IMDB</p>
 <div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1"></a><span class="kw">library</span>(tidyverse)</span>
-<span id="cb1-2"><a href="#cb1-2"></a>imdb_raw =<span class="st"> </span><span class="kw">read_csv</span>(<span class="st">&quot;movie_metadata.csv&quot;</span>)</span>
-<span id="cb1-3"><a href="#cb1-3"></a>imdb =<span class="st"> </span><span class="kw">read_csv</span>(<span class="st">&quot;imdb_model_clean.csv&quot;</span>)</span>
+<span id="cb1-2"><a href="#cb1-2"></a>imdb_raw =<span class="st"> </span><span class="kw">read_csv</span>(<span class="st">&quot;./data/movie_metadata.csv&quot;</span>)</span>
+<span id="cb1-3"><a href="#cb1-3"></a>imdb =<span class="st"> </span><span class="kw">read_csv</span>(<span class="st">&quot;./data/imdb_model_clean.csv&quot;</span>)</span>
 <span id="cb1-4"><a href="#cb1-4"></a><span class="co">#imdb_raw %&gt;% </span></span>
 <span id="cb1-5"><a href="#cb1-5"></a>  <span class="co">#group_by(country) %&gt;% </span></span>
 <span id="cb1-6"><a href="#cb1-6"></a>  <span class="co">#summarize(n = n()) %&gt;% </span></span>
