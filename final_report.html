@@ -471,21 +471,32 @@ $(document).ready(function () {
 <div id="data-cleaning" class="section level3">
 <h3><em>Data Cleaning</em></h3>
 <ul>
-<li>keep only interested variables</li>
-<li>Manipulate <code>genres</code> column
+<li>Keep only interested variables</li>
+<li>Manipulate <code>genres</code> and <code>plot_keywords</code> column:
 <ul>
-<li>input example: “avatar|future|marine|native|paraplegic”</li>
-<li>For model: separate genres into multiple columns with 0 and 1
+<li>Input example: “avatar|future|marine|native|paraplegic”</li>
+<li>For model:
 <ul>
-<li>find all the genres: <code>unique</code>, <code>unlist</code>, and <code>str_split</code></li>
-<li>create a blank dataframe with all 0s
+<li>Purpose: separate into multiple columns with 0 and 1
 <ul>
-<li>columns number is equal to raw dataset</li>
-<li>row number is equal to genres types</li>
+<li>Find all the genres: <code>unique</code>, <code>unlist</code>, and <code>str_split</code></li>
+<li>Create a blank dataframe with all 0s
+<ul>
+<li>Columns number is equal to raw dataset</li>
+<li>Row number is equal to genres types</li>
 </ul></li>
-<li>test for all the movies, if it has the certain genres, change the corresponding number from 0 to 1</li>
+<li>Use for loop: test for all the movies, if it has the certain genres, change the corresponding number from 0 to 1</li>
 </ul></li>
-<li>For shiny: pivot longer</li>
+</ul></li>
+<li>For shiny: <code>separate</code> + <code>pivot_longer</code>:
+<ul>
+<li>Purpose: all the original words as the filter for nearly all the plots
+<ul>
+<li>Use <code>separate</code> function to split the column into multiply sub-columns (g1-g8). 8 is the maximum genre type of a single film. By then, unused columns of a single film will be recorded as NA</li>
+<li>Use <code>pivot_longer</code> to convert these sub-columns to the pattern as id – value. Then, we can clean the value column (drop NA) and ignore the id value.</li>
+<li><code>plot_keywords</code> columns is treated same as this</li>
+</ul></li>
+</ul></li>
 </ul></li>
 </ul>
 </div>
