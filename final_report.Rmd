@@ -109,21 +109,378 @@ Variable name             | Data type | Variable explanation
 
 ### *Data Cleaning*
 
-- Keep only interested variables
-- Manipulate `genres` and `plot_keywords` column:
+- For model
+  - Keep only interested variables
+  - Manipulate `genres` and `plot_keywords` column:
   - Input example: "avatar|future|marine|native|paraplegic"
-  - For model: 
-    - Purpose: separate into multiple columns with 0 and 1
-      - Find all the genres: `unique`, `unlist`, and `str_split`
-      - Create a blank dataframe with all 0s
-        - Columns number is equal to raw dataset
-        - Row number is equal to genres types
-      - Use for loop: test for all the movies, if it has the certain genres, change the corresponding number from 0 to 1
-  - For shiny: `separate` + `pivot_longer`:
+  - Purpose: separate into multiple columns with 0 and 1
+    - Find all the genres: `unique`, `unlist`, and `str_split`
+    - Create a blank dataframe with all 0s
+      - Columns number is equal to raw dataset
+      - Row number is equal to genres types
+    - Use for loop: test for all the movies, if it has the certain genres, change the corresponding number from 0 to 1
+      
+```{r, eval = F}
+imdb_raw = read_csv("./data/movie_metadata.csv")
+#data cleaning 
+imdb = imdb_raw %>%
+  as.data.frame() %>% 
+  drop_na(movie_title) %>%
+#keep only interested variables 
+  select(
+    -color, -actor_2_name, -actor_2_facebook_likes, -actor_3_name, -actor_3_facebook_likes, -facenumber_in_poster, -movie_imdb_link, -content_rating, -plot_keywords
+  ) %>%
+  drop_na(gross)
+
+rownames(imdb) = c(1:dim(imdb)[1])
+
+#separate genres into multiple columns
+a = imdb$genres
+genres_list = unique(unlist(str_split(a, "[|]")))
+
+niubility = as.data.frame(matrix(0, nrow=dim(imdb)[1], ncol=length(genres_list)))
+colnames(niubility) = genres_list
+
+for (i in 1:dim(imdb)[1]){
+  b = unlist(str_split(imdb$genres[i], "[|]"))
+  for (word in b){
+    niubility[i, word] = 1
+    }
+  }
+
+rownames(niubility) = c(1:dim(imdb)[1])
+
+imdb_after_genre = data.frame(imdb, niubility)
+
+imdb_model = 
+  imdb_after_genre %>% 
+  select(num_critic_for_reviews:gross, num_voted_users:num_user_for_reviews, budget, imdb_score: Film.Noir)
+
+imdb_model_clean = 
+  imdb_model %>% 
+  select(num_critic_for_reviews:num_user_for_reviews, imdb_score, Action:Fantasy, Romance:Family, Drama, Sport:Horror, Music)
+```
+
+
+- For shiny: `separate` + `pivot_longer`:
     - Purpose: all the original words as the filter for nearly all the plots
       - Use `separate` function to split the column into multiply sub-columns (g1-g8). 8 is the maximum genre type of a single film. By then, unused columns of a single film will be recorded as NA
       - Use `pivot_longer` to convert these sub-columns to the pattern as id – value. Then, we can clean the value column (drop NA) and ignore the id value. 
       - `plot_keywords` columns is treated same as this
+      
+- Initial cleaning for shiny  
+  - manipulate the genre and plot_keywords columns  
+  - separate and pivot_large those two columns
+
+```{r, eval = F}
+### Import data
+
+imdb_raw = read_csv("./Dataset/movie_metadata.csv")
+
+
+
+### Get the year month date:
+
+get_ymd <- function(url_raw)
+{
+  url = str_replace(url_raw,"\\?ref","releaseinfo?ref")
+  swm_html = read_html(url)
+  ymd = 
+    swm_html %>% 
+    html_nodes(css = ".release-date-item:nth-child(1) .release-date-item__date") %>% 
+    html_text()
+  return(ymd)
+}
+
+#imdb = 
+#  imdb_raw %>% 
+#  mutate(ymd = map(movie_imdb_link, get_ymd)) %>% 
+#  unnest(ymd)
+
+### Cleaning
+imdb_clean = 
+  imdb_raw %>%
+  drop_na(movie_title, gross) %>% 
+  mutate(movie_title = str_replace(movie_title,"\\?$","")) %>% 
+  separate(genres,
+           sep = "\\|",
+           into = c("g1","g2","g3","g4","g5","g6","g7","g8")) %>% 
+  pivot_longer(g1:g8,
+               names_to = "dummy",
+               values_to = "genres") %>%
+  select(-dummy) %>% 
+  drop_na(genres) %>% 
+  separate(plot_keywords, 
+           sep = "\\|",
+           into = c("g1","g2","g3","g4","g5","g6","g7","g8")) %>% 
+  pivot_longer(g1:g8,
+               names_to = "dummy",
+               values_to = "plot_keyword") %>%
+  select(-dummy) %>% 
+  drop_na(plot_keyword)
+
+  
+write.csv(imdb_clean,"./Dataset/imdb_explore_clean.csv", fileEncoding = "utf-8")
+```
+
+      
+- Reading ymd from IMDb:
+  - Use css selector to identify the target element
+  - For loop and get ymd information over repeated writing 
+              
+```{r, eval = F}
+# ymd
+
+### Get the year month date:
+
+get_ymd <- function(url_raw)
+{
+  url = str_replace(url_raw,"\\?ref","releaseinfo?ref")
+  swm_html = read_html(url)
+  ymd = 
+    swm_html %>% 
+    html_nodes(css = ".release-date-item:nth-child(1) .release-date-item__date") %>% 
+    html_text()
+  return(ymd)
+}
+
+for (i in 1:nrow(dataset_r)) {
+  test_df = read_csv("./data/imdb_release.csv")
+  if (is.na(test_df[[3]][i])) {
+    test_df[[3]][i] <- get_ymd(test_df[[2]][i])
+  } 
+  test_df %>% 
+    write_csv(.,"./data/imdb_release.csv")
+}
+
+imdb_ymd = read_csv("./data/imdb_release.csv") %>% 
+  separate(release_date, into = c("day","month","year"), sep = " ", fill = "left") %>% 
+  write_csv(.,"./data/imdb_ymd.csv")
+```
+
+- Animation plot
+  - Use `left_join` to intergate ymd with our dataset     
+
+```{r animation, eval = F}
+# Animation 
+imdb_clean = read_csv("./dataset/movie_metadata.csv") %>% 
+  drop_na(movie_title, gross) %>% 
+  mutate(movie_title = str_replace(movie_title,"\\?$","")) %>% 
+  separate(genres,
+           sep = "\\|",
+           into = c("g1","g2","g3","g4","g5","g6","g7","g8")) %>% 
+  pivot_longer(g1:g8,
+               names_to = "dummy",
+               values_to = "genres") %>%
+  select(-dummy) %>% 
+  drop_na(genres)
+
+imdb_ymd = read_csv("./dataset/imdb_ymd.csv") %>% 
+  select(-movie_imdb_link)
+
+month_df = 
+  tibble(
+    month_value = 1:12,
+    month = month.name
+  )
+
+imdb_m = left_join(imdb_ymd, month_df, by = "month") %>% 
+  select(-month) %>% 
+  mutate(month = month_value, .keep = "unused")
+
+imdb_cleanymd = left_join(imdb_clean,imdb_m,by = "movie_title")
+imdb_cleanymd %>% 
+  select(gross, genres, month, year, imdb_score) %>% 
+  write_csv("./data/shiny_animation.csv")
+```
+- Circulation plot
+  - Use `unqiue`, `distinct` and `sort` to order the movie_list     
+```{r, eval = F}
+#Circulation plot
+
+imdb_cir <- read_csv("./Dataset/imdb_explore_clean.csv")
+
+imdb_cir <-
+  imdb_cir %>% 
+  select(movie_title, director_name, title_year, gross, genres) %>% 
+  distinct(movie_title, genres,  .keep_all = T)
+
+valuelist <- unique(pull(imdb_cir, gross))
+
+valuelist <- sort(valuelist, decreasing = T)[1:50]
+
+imdb_cir_final <-
+  imdb_cir %>% 
+  filter(gross %in% valuelist) %>% 
+  arrange(gross)
+
+write_csv(imdb_cir_final, "./Dataset/shiny_circulation.csv")
+
+```
+- Gross vs. everything plot
+  - Select the interested numeric variables, title and genre
+  - Distinct by title and genre     
+```{r, eval = F}
+# Plotly
+
+df1 = read_csv("./Dataset/imdb_explore_clean.csv") %>% 
+  select(movie_title,genres, gross, num_critic_for_reviews,duration,director_facebook_likes,
+         actor_3_facebook_likes,actor_2_facebook_likes,actor_1_facebook_likes,
+         num_voted_users, facenumber_in_poster, num_user_for_reviews,
+         budget, imdb_score, aspect_ratio, movie_facebook_likes, title_year) %>% 
+  mutate(title_year = as.numeric(title_year)) %>% 
+  distinct(movie_title, genres, .keep_all = T)
+  
+
+write_csv(df1, "./Dataset/shiny_plotly.csv")
+```
+- Radar plot
+  - write function to repeat the summarize process by genres     
+```{r, eval = F}
+## Radar plot
+
+### Step 1. Extract relevant data:
+
+imdb_vis <- read_csv("./Dataset/imdb_explore_clean.csv")
+
+imdb_radar <-
+  imdb_vis %>% 
+  select(movie_title,genres, gross, num_critic_for_reviews,duration,director_facebook_likes,
+         actor_3_facebook_likes,actor_2_facebook_likes,actor_1_facebook_likes,
+         num_voted_users, facenumber_in_poster, num_user_for_reviews,
+         budget, imdb_score, aspect_ratio, movie_facebook_likes) %>% 
+  distinct(movie_title,genres,.keep_all = TRUE) 
+
+imdb_radar_raw = imdb_radar
+
+name_list_radar = names(imdb_radar)
+
+
+### Step 2. Functions for summarize:
+
+group_and_standardize <- function(Tibble)
+{
+  name_list_radar = names(Tibble)
+  Tibble_begin <- 
+    Tibble %>% 
+    select(name_list_radar[2]) %>% 
+    group_by(genres) %>% 
+    summarise(n=n())
+  
+  for (i in 3:length(name_list_radar))
+  {
+    Tibble_process <- 
+      Tibble %>% 
+      select(name_list_radar[2],name_list_radar[i]) %>% 
+      rename(dummyname = name_list_radar[i]) %>% 
+      group_by(genres) %>% 
+      summarise(dummy = mean(dummyname, na.rm = T)) %>% 
+      mutate(dummy = (dummy - min(dummy, na.rm = T))/(max(dummy, na.rm = T)- min(dummy, na.rm = T))) %>% 
+      select(dummy)
+    Tibble_begin = cbind(Tibble_begin,Tibble_process)
+  }
+  return(Tibble_begin)
+}
+
+
+group_without_standardize <- function(Tibble)
+{
+  name_list_radar = names(Tibble)
+  Tibble_begin <- 
+    Tibble %>% 
+    select(name_list_radar[2]) %>% 
+    group_by(genres) %>% 
+    summarise(n=n())
+  
+  for (i in 3:length(name_list_radar))
+  {
+    Tibble_process <- 
+      Tibble %>% 
+      select(name_list_radar[2],name_list_radar[i]) %>% 
+      rename(dummyname = name_list_radar[i]) %>% 
+      group_by(genres) %>% 
+      summarise(dummy = mean(dummyname, na.rm = T)) %>% 
+      select(dummy)
+    Tibble_begin = cbind(Tibble_begin,Tibble_process)
+  }
+  return(Tibble_begin)
+}
+
+
+## The final data
+
+imdb_radar <- group_and_standardize(imdb_radar)
+names(imdb_radar) = c("genres","N", name_list_radar[3:length(name_list_radar)])
+imdb_radar <-
+  imdb_radar %>% 
+  as_tibble() %>% 
+  #select(N) %>% 
+  mutate(N = (N - min(N))/(max(N)-min(N))) %>% 
+  pivot_longer(N:movie_facebook_likes,
+               names_to = "variable",
+               values_to = "value")
+
+write_csv(imdb_radar,"./Dataset/shiny_radar.csv")
+
+
+imdb_radar_raw <- group_without_standardize(imdb_radar_raw)
+names(imdb_radar_raw) = c("genres","N", name_list_radar[3:length(name_list_radar)])
+imdb_radar_raw <-
+  imdb_radar_raw %>% 
+  as_tibble() 
+
+write_csv(imdb_radar_raw,"./Dataset/shiny_radar_df.csv")
+```
+- Wordcloud plot
+  - Select genre and plot_keywords from cleaned datasets     
+```{r, eval = F}
+#Wordcloud
+
+imdb_raw = 
+  read_csv("imdb_explore_clean.csv") %>% 
+  select(genres, plot_keyword) %>% 
+  write.csv("./Dataset/shiny_keyword.csv")
+```
+- Valuebox plot
+  - Use unqiue and genre filter to order the movie list     
+```{r, eval = F}
+# Data for valuebox:
+
+df <- 
+  read_csv("./Dataset/imdb_explore_clean.csv") %>% 
+  select(movie_title, director_name, gross, title_year, genres) %>% 
+  distinct(movie_title, genres, .keep_all = T)
+
+genrelist <- unique(pull(df,genres))
+
+
+df_final <-
+  tibble(movie_title = "",
+         director_name = "",
+         gross = 0,
+         title_year = 0,
+         genres = "")
+
+
+for (g in genrelist){
+  
+  df_sub <- 
+    df %>% 
+    filter(genres == g) %>% 
+    slice(1:3)
+  
+  df_final <- rbind(df_final, df_sub)
+    
+
+  
+}
+
+
+df_final %>%
+  slice(-1) %>% 
+  write_csv("./Dataset/shiny_valuedf.csv")
+
+```
 
 
 ## Formal Analysis

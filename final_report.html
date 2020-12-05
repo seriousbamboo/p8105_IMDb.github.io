@@ -20,6 +20,7 @@
 <script src="site_libs/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
 <script src="site_libs/bootstrap-3.3.5/shim/respond.min.js"></script>
 <script src="site_libs/navigation-1.1/tabsets.js"></script>
+<script src="site_libs/navigation-1.1/codefolding.js"></script>
 <link href="site_libs/highlightjs-9.12.0/default.css" rel="stylesheet" />
 <script src="site_libs/highlightjs-9.12.0/highlight.js"></script>
 <link href="site_libs/anchor-sections-1.0/anchor-sections.css" rel="stylesheet" />
@@ -258,6 +259,9 @@ $(document).ready(function () {
 </style>
 
 <!-- code folding -->
+<style type="text/css">
+.code-folding-btn { margin-bottom: 4px; }
+</style>
 
 
 
@@ -297,10 +301,7 @@ $(document).ready(function () {
   <a href="final_report.html">Report</a>
 </li>
 <li>
-  <a href="https://gou29.shinyapps.io/p8015_final_shinyapp/">
-    <span class="fa fa-chart-bar fa-lg"></span>
-     
-  </a>
+  <a href="https://gou29.shinyapps.io/p8015_final_shinyapp/">Reactive Explore!</a>
 </li>
 <li>
   <a href="https://github.com/seriousbamboo/p8105_IMDb.github.io">
@@ -314,6 +315,14 @@ $(document).ready(function () {
 </div><!--/.navbar -->
 
 <div class="fluid-row" id="header">
+
+<div class="btn-group pull-right">
+<button type="button" class="btn btn-default btn-xs dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><span>Code</span> <span class="caret"></span></button>
+<ul class="dropdown-menu" style="min-width: 50px;">
+<li><a id="rmd-show-all-code" href="#">Show All Code</a></li>
+<li><a id="rmd-hide-all-code" href="#">Hide All Code</a></li>
+</ul>
+</div>
 
 
 
@@ -485,12 +494,11 @@ $(document).ready(function () {
 <div id="data-cleaning" class="section level3">
 <h3><em>Data Cleaning</em></h3>
 <ul>
+<li>For model
+<ul>
 <li>Keep only interested variables</li>
-<li>Manipulate <code>genres</code> and <code>plot_keywords</code> column:
-<ul>
+<li>Manipulate <code>genres</code> and <code>plot_keywords</code> column:</li>
 <li>Input example: “avatar|future|marine|native|paraplegic”</li>
-<li>For model:
-<ul>
 <li>Purpose: separate into multiple columns with 0 and 1
 <ul>
 <li>Find all the genres: <code>unique</code>, <code>unlist</code>, and <code>str_split</code></li>
@@ -502,6 +510,46 @@ $(document).ready(function () {
 <li>Use for loop: test for all the movies, if it has the certain genres, change the corresponding number from 0 to 1</li>
 </ul></li>
 </ul></li>
+</ul>
+<pre class="r"><code>imdb_raw = read_csv(&quot;./data/movie_metadata.csv&quot;)
+#data cleaning 
+imdb = imdb_raw %&gt;%
+  as.data.frame() %&gt;% 
+  drop_na(movie_title) %&gt;%
+#keep only interested variables 
+  select(
+    -color, -actor_2_name, -actor_2_facebook_likes, -actor_3_name, -actor_3_facebook_likes, -facenumber_in_poster, -movie_imdb_link, -content_rating, -plot_keywords
+  ) %&gt;%
+  drop_na(gross)
+
+rownames(imdb) = c(1:dim(imdb)[1])
+
+#separate genres into multiple columns
+a = imdb$genres
+genres_list = unique(unlist(str_split(a, &quot;[|]&quot;)))
+
+niubility = as.data.frame(matrix(0, nrow=dim(imdb)[1], ncol=length(genres_list)))
+colnames(niubility) = genres_list
+
+for (i in 1:dim(imdb)[1]){
+  b = unlist(str_split(imdb$genres[i], &quot;[|]&quot;))
+  for (word in b){
+    niubility[i, word] = 1
+    }
+  }
+
+rownames(niubility) = c(1:dim(imdb)[1])
+
+imdb_after_genre = data.frame(imdb, niubility)
+
+imdb_model = 
+  imdb_after_genre %&gt;% 
+  select(num_critic_for_reviews:gross, num_voted_users:num_user_for_reviews, budget, imdb_score: Film.Noir)
+
+imdb_model_clean = 
+  imdb_model %&gt;% 
+  select(num_critic_for_reviews:num_user_for_reviews, imdb_score, Action:Fantasy, Romance:Family, Drama, Sport:Horror, Music)</code></pre>
+<ul>
 <li>For shiny: <code>separate</code> + <code>pivot_longer</code>:
 <ul>
 <li>Purpose: all the original words as the filter for nearly all the plots
@@ -511,8 +559,327 @@ $(document).ready(function () {
 <li><code>plot_keywords</code> columns is treated same as this</li>
 </ul></li>
 </ul></li>
+<li>Initial cleaning for shiny
+<ul>
+<li>manipulate the genre and plot_keywords columns<br />
+</li>
+<li>separate and pivot_large those two columns</li>
 </ul></li>
 </ul>
+<pre class="r"><code>### Import data
+
+imdb_raw = read_csv(&quot;./Dataset/movie_metadata.csv&quot;)
+
+
+
+### Get the year month date:
+
+get_ymd &lt;- function(url_raw)
+{
+  url = str_replace(url_raw,&quot;\\?ref&quot;,&quot;releaseinfo?ref&quot;)
+  swm_html = read_html(url)
+  ymd = 
+    swm_html %&gt;% 
+    html_nodes(css = &quot;.release-date-item:nth-child(1) .release-date-item__date&quot;) %&gt;% 
+    html_text()
+  return(ymd)
+}
+
+#imdb = 
+#  imdb_raw %&gt;% 
+#  mutate(ymd = map(movie_imdb_link, get_ymd)) %&gt;% 
+#  unnest(ymd)
+
+### Cleaning
+imdb_clean = 
+  imdb_raw %&gt;%
+  drop_na(movie_title, gross) %&gt;% 
+  mutate(movie_title = str_replace(movie_title,&quot;\\?$&quot;,&quot;&quot;)) %&gt;% 
+  separate(genres,
+           sep = &quot;\\|&quot;,
+           into = c(&quot;g1&quot;,&quot;g2&quot;,&quot;g3&quot;,&quot;g4&quot;,&quot;g5&quot;,&quot;g6&quot;,&quot;g7&quot;,&quot;g8&quot;)) %&gt;% 
+  pivot_longer(g1:g8,
+               names_to = &quot;dummy&quot;,
+               values_to = &quot;genres&quot;) %&gt;%
+  select(-dummy) %&gt;% 
+  drop_na(genres) %&gt;% 
+  separate(plot_keywords, 
+           sep = &quot;\\|&quot;,
+           into = c(&quot;g1&quot;,&quot;g2&quot;,&quot;g3&quot;,&quot;g4&quot;,&quot;g5&quot;,&quot;g6&quot;,&quot;g7&quot;,&quot;g8&quot;)) %&gt;% 
+  pivot_longer(g1:g8,
+               names_to = &quot;dummy&quot;,
+               values_to = &quot;plot_keyword&quot;) %&gt;%
+  select(-dummy) %&gt;% 
+  drop_na(plot_keyword)
+
+  
+write.csv(imdb_clean,&quot;./Dataset/imdb_explore_clean.csv&quot;, fileEncoding = &quot;utf-8&quot;)</code></pre>
+<ul>
+<li>Reading ymd from IMDb:
+<ul>
+<li>Use css selector to identify the target element</li>
+<li>For loop and get ymd information over repeated writing</li>
+</ul></li>
+</ul>
+<pre class="r"><code># ymd
+
+### Get the year month date:
+
+get_ymd &lt;- function(url_raw)
+{
+  url = str_replace(url_raw,&quot;\\?ref&quot;,&quot;releaseinfo?ref&quot;)
+  swm_html = read_html(url)
+  ymd = 
+    swm_html %&gt;% 
+    html_nodes(css = &quot;.release-date-item:nth-child(1) .release-date-item__date&quot;) %&gt;% 
+    html_text()
+  return(ymd)
+}
+
+for (i in 1:nrow(dataset_r)) {
+  test_df = read_csv(&quot;./data/imdb_release.csv&quot;)
+  if (is.na(test_df[[3]][i])) {
+    test_df[[3]][i] &lt;- get_ymd(test_df[[2]][i])
+  } 
+  test_df %&gt;% 
+    write_csv(.,&quot;./data/imdb_release.csv&quot;)
+}
+
+imdb_ymd = read_csv(&quot;./data/imdb_release.csv&quot;) %&gt;% 
+  separate(release_date, into = c(&quot;day&quot;,&quot;month&quot;,&quot;year&quot;), sep = &quot; &quot;, fill = &quot;left&quot;) %&gt;% 
+  write_csv(.,&quot;./data/imdb_ymd.csv&quot;)</code></pre>
+<ul>
+<li>Animation plot
+<ul>
+<li>Use <code>left_join</code> to intergate ymd with our dataset</li>
+</ul></li>
+</ul>
+<pre class="r"><code># Animation 
+imdb_clean = read_csv(&quot;./dataset/movie_metadata.csv&quot;) %&gt;% 
+  drop_na(movie_title, gross) %&gt;% 
+  mutate(movie_title = str_replace(movie_title,&quot;\\?$&quot;,&quot;&quot;)) %&gt;% 
+  separate(genres,
+           sep = &quot;\\|&quot;,
+           into = c(&quot;g1&quot;,&quot;g2&quot;,&quot;g3&quot;,&quot;g4&quot;,&quot;g5&quot;,&quot;g6&quot;,&quot;g7&quot;,&quot;g8&quot;)) %&gt;% 
+  pivot_longer(g1:g8,
+               names_to = &quot;dummy&quot;,
+               values_to = &quot;genres&quot;) %&gt;%
+  select(-dummy) %&gt;% 
+  drop_na(genres)
+
+imdb_ymd = read_csv(&quot;./dataset/imdb_ymd.csv&quot;) %&gt;% 
+  select(-movie_imdb_link)
+
+month_df = 
+  tibble(
+    month_value = 1:12,
+    month = month.name
+  )
+
+imdb_m = left_join(imdb_ymd, month_df, by = &quot;month&quot;) %&gt;% 
+  select(-month) %&gt;% 
+  mutate(month = month_value, .keep = &quot;unused&quot;)
+
+imdb_cleanymd = left_join(imdb_clean,imdb_m,by = &quot;movie_title&quot;)
+imdb_cleanymd %&gt;% 
+  select(gross, genres, month, year, imdb_score) %&gt;% 
+  write_csv(&quot;./data/shiny_animation.csv&quot;)</code></pre>
+<ul>
+<li>Circulation plot
+<ul>
+<li>Use <code>unqiue</code>, <code>distinct</code> and <code>sort</code> to order the movie_list</li>
+</ul></li>
+</ul>
+<pre class="r"><code>#Circulation plot
+
+imdb_cir &lt;- read_csv(&quot;./Dataset/imdb_explore_clean.csv&quot;)
+
+imdb_cir &lt;-
+  imdb_cir %&gt;% 
+  select(movie_title, director_name, title_year, gross, genres) %&gt;% 
+  distinct(movie_title, genres,  .keep_all = T)
+
+valuelist &lt;- unique(pull(imdb_cir, gross))
+
+valuelist &lt;- sort(valuelist, decreasing = T)[1:50]
+
+imdb_cir_final &lt;-
+  imdb_cir %&gt;% 
+  filter(gross %in% valuelist) %&gt;% 
+  arrange(gross)
+
+write_csv(imdb_cir_final, &quot;./Dataset/shiny_circulation.csv&quot;)</code></pre>
+<ul>
+<li>Gross vs. everything plot
+<ul>
+<li>Select the interested numeric variables, title and genre</li>
+<li>Distinct by title and genre</li>
+</ul></li>
+</ul>
+<pre class="r"><code># Plotly
+
+df1 = read_csv(&quot;./Dataset/imdb_explore_clean.csv&quot;) %&gt;% 
+  select(movie_title,genres, gross, num_critic_for_reviews,duration,director_facebook_likes,
+         actor_3_facebook_likes,actor_2_facebook_likes,actor_1_facebook_likes,
+         num_voted_users, facenumber_in_poster, num_user_for_reviews,
+         budget, imdb_score, aspect_ratio, movie_facebook_likes, title_year) %&gt;% 
+  mutate(title_year = as.numeric(title_year)) %&gt;% 
+  distinct(movie_title, genres, .keep_all = T)
+  
+
+write_csv(df1, &quot;./Dataset/shiny_plotly.csv&quot;)</code></pre>
+<ul>
+<li>Radar plot
+<ul>
+<li>write function to repeat the summarize process by genres</li>
+</ul></li>
+</ul>
+<pre class="r"><code>## Radar plot
+
+### Step 1. Extract relevant data:
+
+imdb_vis &lt;- read_csv(&quot;./Dataset/imdb_explore_clean.csv&quot;)
+
+imdb_radar &lt;-
+  imdb_vis %&gt;% 
+  select(movie_title,genres, gross, num_critic_for_reviews,duration,director_facebook_likes,
+         actor_3_facebook_likes,actor_2_facebook_likes,actor_1_facebook_likes,
+         num_voted_users, facenumber_in_poster, num_user_for_reviews,
+         budget, imdb_score, aspect_ratio, movie_facebook_likes) %&gt;% 
+  distinct(movie_title,genres,.keep_all = TRUE) 
+
+imdb_radar_raw = imdb_radar
+
+name_list_radar = names(imdb_radar)
+
+
+### Step 2. Functions for summarize:
+
+group_and_standardize &lt;- function(Tibble)
+{
+  name_list_radar = names(Tibble)
+  Tibble_begin &lt;- 
+    Tibble %&gt;% 
+    select(name_list_radar[2]) %&gt;% 
+    group_by(genres) %&gt;% 
+    summarise(n=n())
+  
+  for (i in 3:length(name_list_radar))
+  {
+    Tibble_process &lt;- 
+      Tibble %&gt;% 
+      select(name_list_radar[2],name_list_radar[i]) %&gt;% 
+      rename(dummyname = name_list_radar[i]) %&gt;% 
+      group_by(genres) %&gt;% 
+      summarise(dummy = mean(dummyname, na.rm = T)) %&gt;% 
+      mutate(dummy = (dummy - min(dummy, na.rm = T))/(max(dummy, na.rm = T)- min(dummy, na.rm = T))) %&gt;% 
+      select(dummy)
+    Tibble_begin = cbind(Tibble_begin,Tibble_process)
+  }
+  return(Tibble_begin)
+}
+
+
+group_without_standardize &lt;- function(Tibble)
+{
+  name_list_radar = names(Tibble)
+  Tibble_begin &lt;- 
+    Tibble %&gt;% 
+    select(name_list_radar[2]) %&gt;% 
+    group_by(genres) %&gt;% 
+    summarise(n=n())
+  
+  for (i in 3:length(name_list_radar))
+  {
+    Tibble_process &lt;- 
+      Tibble %&gt;% 
+      select(name_list_radar[2],name_list_radar[i]) %&gt;% 
+      rename(dummyname = name_list_radar[i]) %&gt;% 
+      group_by(genres) %&gt;% 
+      summarise(dummy = mean(dummyname, na.rm = T)) %&gt;% 
+      select(dummy)
+    Tibble_begin = cbind(Tibble_begin,Tibble_process)
+  }
+  return(Tibble_begin)
+}
+
+
+## The final data
+
+imdb_radar &lt;- group_and_standardize(imdb_radar)
+names(imdb_radar) = c(&quot;genres&quot;,&quot;N&quot;, name_list_radar[3:length(name_list_radar)])
+imdb_radar &lt;-
+  imdb_radar %&gt;% 
+  as_tibble() %&gt;% 
+  #select(N) %&gt;% 
+  mutate(N = (N - min(N))/(max(N)-min(N))) %&gt;% 
+  pivot_longer(N:movie_facebook_likes,
+               names_to = &quot;variable&quot;,
+               values_to = &quot;value&quot;)
+
+write_csv(imdb_radar,&quot;./Dataset/shiny_radar.csv&quot;)
+
+
+imdb_radar_raw &lt;- group_without_standardize(imdb_radar_raw)
+names(imdb_radar_raw) = c(&quot;genres&quot;,&quot;N&quot;, name_list_radar[3:length(name_list_radar)])
+imdb_radar_raw &lt;-
+  imdb_radar_raw %&gt;% 
+  as_tibble() 
+
+write_csv(imdb_radar_raw,&quot;./Dataset/shiny_radar_df.csv&quot;)</code></pre>
+<ul>
+<li>Wordcloud plot
+<ul>
+<li>Select genre and plot_keywords from cleaned datasets</li>
+</ul></li>
+</ul>
+<pre class="r"><code>#Wordcloud
+
+imdb_raw = 
+  read_csv(&quot;imdb_explore_clean.csv&quot;) %&gt;% 
+  select(genres, plot_keyword) %&gt;% 
+  write.csv(&quot;./Dataset/shiny_keyword.csv&quot;)</code></pre>
+<ul>
+<li>Valuebox plot
+<ul>
+<li>Use unqiue and genre filter to order the movie list</li>
+</ul></li>
+</ul>
+<pre class="r"><code># Data for valuebox:
+
+df &lt;- 
+  read_csv(&quot;./Dataset/imdb_explore_clean.csv&quot;) %&gt;% 
+  select(movie_title, director_name, gross, title_year, genres) %&gt;% 
+  distinct(movie_title, genres, .keep_all = T)
+
+genrelist &lt;- unique(pull(df,genres))
+
+
+df_final &lt;-
+  tibble(movie_title = &quot;&quot;,
+         director_name = &quot;&quot;,
+         gross = 0,
+         title_year = 0,
+         genres = &quot;&quot;)
+
+
+for (g in genrelist){
+  
+  df_sub &lt;- 
+    df %&gt;% 
+    filter(genres == g) %&gt;% 
+    slice(1:3)
+  
+  df_final &lt;- rbind(df_final, df_sub)
+    
+
+  
+}
+
+
+df_final %&gt;%
+  slice(-1) %&gt;% 
+  write_csv(&quot;./Dataset/shiny_valuedf.csv&quot;)</code></pre>
 </div>
 </div>
 <div id="formal-analysis" class="section level2">
@@ -528,7 +895,7 @@ $(document).ready(function () {
 <h3>Heatmap Plots of Correlation</h3>
 <div id="heatmap-for-genres" class="section level4">
 <h4>Heatmap for Genres</h4>
-<p><img src="final_report_files/figure-html/unnamed-chunk-4-1.png" width="672" /></p>
+<p><img src="final_report_files/figure-html/unnamed-chunk-12-1.png" width="672" /></p>
 <pre><code>## # A tibble: 1 x 12
 ##   ` `   Adventure Fantasy Animation Family Sport Documentary  News Action Sci.Fi
 ##   &lt;fct&gt;     &lt;dbl&gt;   &lt;dbl&gt;     &lt;dbl&gt;  &lt;dbl&gt; &lt;dbl&gt;       &lt;dbl&gt; &lt;dbl&gt;  &lt;dbl&gt;  &lt;dbl&gt;
@@ -538,7 +905,7 @@ $(document).ready(function () {
 </div>
 <div id="heatmap-for-non-genre-factors" class="section level4">
 <h4>Heatmap for non-Genre Factors</h4>
-<p><img src="final_report_files/figure-html/unnamed-chunk-6-1.png" width="672" /></p>
+<p><img src="final_report_files/figure-html/unnamed-chunk-14-1.png" width="672" /></p>
 <pre><code>## # A tibble: 1 x 9
 ##   ` `   num_voted_users num_user_for_re~ duration imdb_score budget aspect_ratio
 ##   &lt;fct&gt;           &lt;dbl&gt;            &lt;dbl&gt;    &lt;dbl&gt;      &lt;dbl&gt;  &lt;dbl&gt;        &lt;dbl&gt;
@@ -556,7 +923,7 @@ $(document).ready(function () {
 <p>We applied <code>regsubsets</code> from <code>leap</code> library to conduct the regression. Basically, this function constructs the null model first (contains only intercept) and combines various of variables to form an exhaustive subset of models. Within the subset, the function will compare the adjusted R2 and find the best combination of predictors. It is a better method than stepwise selection but needs a longer calculation time. Also, since cross validation has been done within the function, we don’t need to perform the cross validation. Because we don’t have many features, we decided to utilize this method to select the best model.</p>
 <div id="model-without-genres" class="section level4">
 <h4>Model without Genres</h4>
-<p><img src="final_report_files/figure-html/unnamed-chunk-9-1.png" width="672" /> <img src="final_report_files/figure-html/unnamed-chunk-10-1.png" width="672" /></p>
+<p><img src="final_report_files/figure-html/unnamed-chunk-17-1.png" width="672" /> <img src="final_report_files/figure-html/unnamed-chunk-18-1.png" width="672" /></p>
 <p>Figure 3 showed how many variables should the best model included. In our case, including 8 variables will make our model reach the highest accuracy (highest adjusted R2).</p>
 <p>From Figure 4, we can conclude our model should include following variables: number of critics for reviews, Facebook likes of the director, Facebook likes of the primary actor/actress, number of voted users, total Facebook likes of the cast, number of users for reviews, IMDB score and the number of genres.</p>
 <div id="non-genre-model" class="section level5">
@@ -621,7 +988,7 @@ $(document).ready(function () {
 </div>
 <div id="model-of-genres" class="section level4">
 <h4>Model of Genres</h4>
-<p><img src="final_report_files/figure-html/unnamed-chunk-14-1.png" width="672" /><img src="final_report_files/figure-html/unnamed-chunk-14-2.png" width="672" /></p>
+<p><img src="final_report_files/figure-html/unnamed-chunk-22-1.png" width="672" /><img src="final_report_files/figure-html/unnamed-chunk-22-2.png" width="672" /></p>
 <p>Similarly, 8 variables should be included in our model according to Figure 5. From the Figure 6, we can conclude Action, Adventure, Fantasy, Sci-Fiction, Family, Drama, Horror and Documentary are important factors that influence the gross. However, since the accuracy (adjusted R2) is small, genre in general may not be an important factor to consider.</p>
 <div id="genre-model" class="section level5">
 <h5>Genre Model</h5>
@@ -687,7 +1054,7 @@ $(document).ready(function () {
 <div id="diagnosis" class="section level3">
 <h3>Diagnosis</h3>
 <div class="figure">
-<img src="final_report_files/figure-html/unnamed-chunk-17-1.png" alt="Figure 7-10. Plots to Check the Assumptions after Transformation" width="672" />
+<img src="final_report_files/figure-html/unnamed-chunk-25-1.png" alt="Figure 7-10. Plots to Check the Assumptions after Transformation" width="672" />
 <p class="caption">
 Figure 7-10. Plots to Check the Assumptions after Transformation
 </p>
@@ -704,7 +1071,7 @@ Figure 7-10. Plots to Check the Assumptions after Transformation
 <h4>Box-Cox Transformation</h4>
 <p>Box-Cox transformation is another common method to normalize the data. Detailed information is provided <a href="https://rss.onlinelibrary.wiley.com/doi/abs/10.1111/j.2517-6161.1964.tb00553.x">here</a>. We performed Box-Cox transformation to our non-Genre model and check the assumptions again.</p>
 <div class="figure">
-<img src="final_report_files/figure-html/unnamed-chunk-18-1.png" alt="Figure 11. Fitted Lambda for Box-Cox Transformation." width="672" />
+<img src="final_report_files/figure-html/unnamed-chunk-26-1.png" alt="Figure 11. Fitted Lambda for Box-Cox Transformation." width="672" />
 <p class="caption">
 Figure 11. Fitted Lambda for Box-Cox Transformation.
 </p>
@@ -714,7 +1081,7 @@ Figure 11. Fitted Lambda for Box-Cox Transformation.
 <div id="assumption-checking-after-transformation" class="section level4">
 <h4>Assumption Checking after Transformation</h4>
 <div class="figure">
-<img src="final_report_files/figure-html/unnamed-chunk-19-1.png" alt="Figure 12-15. Plots to Check the Assumptions after Transformation" width="672" />
+<img src="final_report_files/figure-html/unnamed-chunk-27-1.png" alt="Figure 12-15. Plots to Check the Assumptions after Transformation" width="672" />
 <p class="caption">
 Figure 12-15. Plots to Check the Assumptions after Transformation
 </p>
@@ -788,6 +1155,11 @@ $(document).ready(function () {
 </script>
 
 <!-- code folding -->
+<script>
+$(document).ready(function () {
+  window.initializeCodeFolding("hide" === "show");
+});
+</script>
 
 
 <!-- dynamically load mathjax for compatibility with self-contained -->
