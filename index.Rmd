@@ -28,5 +28,45 @@ output:
     </body>  
 </html>
 
-# This part is the introdction
+<img src = "images/theater_under_covid.jpg" style = "width:100%"> 
+
+###### Image: AMERICAN-STATESMAN/JAY JANNER
+
+
+# Introduction
+
+Given the scenario of social distancing and temporary closure of movie theaters across the United States, the pandemic did hit the movie industry severly not only for a domestic market but also in a global scale. According to Comoscore, it has been a dramatic 76% drop in domestic box office in 2020 compared with the same point in 2019. Substantial restructing in the movie industry urge the producers and directors to be effective and efficient as much as possible. Box-office prediction has never been such a crucial problem in the film industry, such that profitability is directly associated with strategy made by investors and producers. In particular, we are interested in:
+
+- What is the general trend of gross across time? Will this pattern vary for different genres?
+- What is the association between Gross and other variables including IMDB_score, facebook_likes?
+- Is director a significant predictor of Gross?
+- the crude relationship between number of reviews and Gross
+
+<img src = "images/theaters.png" style = "width:100%"> 
+
+###### Image: REUTERS/Mario Anzuon
+
+# Data
+
+The main dataset for our project is a combined dataset from dataset on Kaggle and dataset reading from IMDb using the css selector. For our purpose, regression analysis will be the main method. Details about the data and analysis can be found in the section of Regression Analysis section.
+
+# Findings
+
+
+
+# Report
+
+
+
+# Website Navigation
+
+
+# Contributors
+- Jiying Han | [Website](https://jiying-han.github.io/)
+- Liucheng Shi | [Website](https://seriousbamboo.github.io/)
+- Wenhao Gou | [Website](https://Gou-29.github.io/)
+- Yatong Feng | [Website](https://tiffanyfeng520.github.io/)
+- Zhe Chen | [Website](https://zheChenJack621.github.io/)
+
+
 

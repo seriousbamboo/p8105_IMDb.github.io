@@ -11,7 +11,7 @@
 
 
 
-<title>P8105_IMDb</title>
+<title>Final_report</title>
 
 <script src="site_libs/jquery-1.11.3/jquery.min.js"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -19,9 +19,6 @@
 <script src="site_libs/bootstrap-3.3.5/js/bootstrap.min.js"></script>
 <script src="site_libs/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
 <script src="site_libs/bootstrap-3.3.5/shim/respond.min.js"></script>
-<script src="site_libs/jqueryui-1.11.4/jquery-ui.min.js"></script>
-<link href="site_libs/tocify-1.9.1/jquery.tocify.css" rel="stylesheet" />
-<script src="site_libs/tocify-1.9.1/jquery.tocify.js"></script>
 <script src="site_libs/navigation-1.1/tabsets.js"></script>
 <link href="site_libs/highlightjs-9.12.0/default.css" rel="stylesheet" />
 <script src="site_libs/highlightjs-9.12.0/highlight.js"></script>
@@ -264,69 +261,6 @@ $(document).ready(function () {
 
 
 
-<style type="text/css">
-
-#TOC {
-  margin: 25px 0px 20px 0px;
-}
-@media (max-width: 768px) {
-#TOC {
-  position: relative;
-  width: 100%;
-}
-}
-
-@media print {
-.toc-content {
-  /* see https://github.com/w3c/csswg-drafts/issues/4434 */
-  float: right;
-}
-}
-
-.toc-content {
-  padding-left: 30px;
-  padding-right: 40px;
-}
-
-div.main-container {
-  max-width: 1200px;
-}
-
-div.tocify {
-  width: 20%;
-  max-width: 260px;
-  max-height: 85%;
-}
-
-@media (min-width: 768px) and (max-width: 991px) {
-  div.tocify {
-    width: 25%;
-  }
-}
-
-@media (max-width: 767px) {
-  div.tocify {
-    width: 100%;
-    max-width: none;
-  }
-}
-
-.tocify ul, .tocify li {
-  line-height: 20px;
-}
-
-.tocify-subheader .tocify-item {
-  font-size: 0.90em;
-}
-
-.tocify .list-group-item {
-  border-radius: 0px;
-}
-
-
-</style>
-
-
 
 </head>
 
@@ -334,16 +268,6 @@ div.tocify {
 
 
 <div class="container-fluid main-container">
-
-
-<!-- setup 3col/9col grid for toc_float and main content  -->
-<div class="row-fluid">
-<div class="col-xs-12 col-sm-4 col-md-3">
-<div id="TOC" class="tocify">
-</div>
-</div>
-
-<div class="toc-content col-xs-12 col-sm-8 col-md-9">
 
 
 
@@ -390,81 +314,69 @@ div.tocify {
 
 
 
-<h1 class="title toc-ignore">P8105_IMDb</h1>
+<h1 class="title toc-ignore">Final_report</h1>
 
 </div>
 
 
-<html>
-<head>
-<meta charset="UTF-8">
-</head>
-<script type="text/javascript">  
-        function disptime(){  
-            var today=new Date();  
-            var hh=today.getHours();  
-            var mm=today.getMinutes();
-            var ss = today.getSeconds();
-            if(hh<10){hh = "0"+hh;}
-            if(mm<10){mm = "0"+mm;}
-            if(ss<10){ss = "0"+ss;}
-            document.getElementById("myclock").innerHTML="<h3>Time now: "+hh+":"+mm+":"+ss+"</h4>"  
-        }   
-        //setInterval
-        var mytime = setInterval("disptime()",1000);  
-    </script>
-<body onload="disptime()">
-<div id="myclock">
-
+<div id="motivation" class="section level2">
+<h2>Motivation:</h2>
+<p>Given the scenario of social distancing and temporary closure of movie theaters across the United States, the pandemic did hit the movie industry severly not only for a domestic market but also in a global scale. According to Comoscore, it has been a dramatic 76% drop in domestic box office in 2020 compared with the same point in 2019. Substantial resturcting in the movie industry urge the producers and directors to be effective and efficient as much as possible. Box-office prediction has never been such a crucial problem in the film industry, such that profitability is directly associated with strategy made by investors and producers.</p>
+<p>Our main goal is to:</p>
+<ul>
+<li>use skinny to explore the association between the box-office gross and other variables including genres, budget, and IMDb score</li>
+<li>create word cloud, radar map on contributing factors</li>
+<li>generate linear regression model to predict box-office revenue</li>
+</ul>
 </div>
-</body>
-</html>
-<p><img src = "images/theater_under_covid.JPG" style = "width:100%"></p>
-<div id="image-american-statesmanjay-janner" class="section level6">
-<h6>Image: AMERICAN-STATESMAN/JAY JANNER</h6>
+<div id="related-work" class="section level2">
+<h2>Related Work:</h2>
+<div id="related-work-1" class="section level4">
+<h4><strong>Related Work</strong></h4>
+<p>The following resources are a sample of what inspired this project.</p>
+<ol style="list-style-type: decimal">
+<li>“Here’s how badly coronavirus has decimated the box office” <em>CNN</em>, October 14, 2020. <a href="https://edition.cnn.com/2020/10/14/media/box-office-coronavirus/index.html">Link.</a></li>
+<li>“Disney-owned theaters? Masks with your ticket? Moviegoing could look quite different post-pandemic” <em>USA TODAY</em>, January 16, 2020. <a href="https://www.usatoday.com/story/entertainment/movies/2020/06/14/future-moviegoing-could-coronavirus-kill-movie-theaters/3186292001/">Link.</a></li>
+<li>“Can there be a fairy-tale ending for Hollywood after COVID-19?” <em>WORLD ECONOMIC FORUM</em>, January 23, 2020. <a href="https://www.weforum.org/agenda/2020/07/impact-coronavirus-covid-19-hollywood-global-film-industry-movie-theatres/">Link.</a></li>
+</ol>
 </div>
-<div id="introduction" class="section level1">
-<h1>Introduction</h1>
-<p>Given the scenario of social distancing and temporary closure of movie theaters across the United States, the pandemic did hit the movie industry severly not only for a domestic market but also in a global scale. According to Comoscore, it has been a dramatic 76% drop in domestic box office in 2020 compared with the same point in 2019. Substantial restructing in the movie industry urge the producers and directors to be effective and efficient as much as possible. Box-office prediction has never been such a crucial problem in the film industry, such that profitability is directly associated with strategy made by investors and producers. In particular, we are interested in:</p>
+</div>
+<div id="intial-questions" class="section level2">
+<h2>Intial Questions:</h2>
 <ul>
 <li>What is the general trend of gross across time? Will this pattern vary for different genres?</li>
 <li>What is the association between Gross and other variables including IMDB_score, facebook_likes?</li>
 <li>Is director a significant predictor of Gross?</li>
 <li>the crude relationship between number of reviews and Gross</li>
 </ul>
-<p><img src = "images/theaters.png" style = "width:100%"></p>
-<div id="image-reutersmario-anzuon" class="section level6">
-<h6>Image: REUTERS/Mario Anzuon</h6>
 </div>
-</div>
-<div id="data" class="section level1">
-<h1>Data</h1>
-<p>The main dataset for our project is a combined dataset from dataset on Kaggle and dataset reading from IMDb using the css selector. For our purpose, regression analysis will be the main method. Details about the data and analysis can be found in the section of Regression Analysis section.</p>
-</div>
-<div id="findings" class="section level1">
-<h1>Findings</h1>
-</div>
-<div id="report" class="section level1">
-<h1>Report</h1>
-</div>
-<div id="website-navigation" class="section level1">
-<h1>Website Navigation</h1>
-</div>
-<div id="contributors" class="section level1">
-<h1>Contributors</h1>
+<div id="data" class="section level2">
+<h2>Data</h2>
+<div id="data-sources" class="section level3">
+<h3><em>Data Sources</em></h3>
 <ul>
-<li>Jiying Han | <a href="https://jiying-han.github.io/">Website</a></li>
-<li>Liucheng Shi | <a href="https://seriousbamboo.github.io/">Website</a></li>
-<li>Wenhao Gou | <a href="https://Gou-29.github.io/">Website</a></li>
-<li>Yatong Feng | <a href="https://tiffanyfeng520.github.io/">Website</a></li>
-<li>Zhe Chen | <a href="https://zheChenJack621.github.io/">Website</a></li>
+<li>Primary data source: <a href="https://www.kaggle.com/carolzhangdc/imdb-5000-movie-dataset">Kaggle</a></li>
+<li>release ymd(year, month, date): [IMDb] (<a href="https://https://www.imdb.com/" class="uri">https://https://www.imdb.com/</a>)</li>
 </ul>
+<p> </p>
+</div>
+<div id="variables-of-interest" class="section level3">
+<h3><em>Variables of interest</em></h3>
+<div id="outcomes" class="section level5">
+<h5><strong>Outcomes</strong></h5>
+</div>
+<div id="candidate-predictors" class="section level5">
+<h5><strong>Candidate Predictors</strong></h5>
+<p> </p>
+</div>
+</div>
+<div id="data-cleaning" class="section level3">
+<h3><em>Data Cleaning</em></h3>
+</div>
 </div>
 
 
 
-</div>
-</div>
 
 </div>
 
@@ -497,32 +409,6 @@ $(document).ready(function () {
 
 <!-- code folding -->
 
-<script>
-$(document).ready(function ()  {
-
-    // move toc-ignore selectors from section div to header
-    $('div.section.toc-ignore')
-        .removeClass('toc-ignore')
-        .children('h1,h2,h3,h4,h5').addClass('toc-ignore');
-
-    // establish options
-    var options = {
-      selectors: "h1,h2,h3",
-      theme: "bootstrap3",
-      context: '.toc-content',
-      hashGenerator: function (text) {
-        return text.replace(/[.\\/?&!#<>]/g, '').replace(/\s/g, '_');
-      },
-      ignoreSelector: ".toc-ignore",
-      scrollTo: 0
-    };
-    options.showAndHide = true;
-    options.smoothScroll = true;
-
-    // tocify
-    var toc = $("#TOC").tocify(options).data("toc-tocify");
-});
-</script>
 
 <!-- dynamically load mathjax for compatibility with self-contained -->
 <script>

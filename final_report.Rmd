@@ -1,0 +1,65 @@
+---
+title: "Final_report"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+
+## Motivation:
+
+Given the scenario of social distancing and temporary closure of movie theaters across the United States, the pandemic did hit the movie industry severly not only for a domestic market but also in a global scale. According to Comoscore, it has been a dramatic 76% drop in domestic box office in 2020 compared with the same point in 2019. Substantial resturcting in the movie industry urge the producers and directors to be effective and efficient as much as possible. Box-office prediction has never been such a crucial problem in the film industry, such that profitability is directly associated with strategy made by investors and producers. 
+
+Our main goal is to:
+
+*   use skinny to explore the association between the box-office gross and  other variables including genres, budget, and IMDb score
+*   create word cloud, radar map on contributing factors
+*   generate linear regression model to predict box-office revenue 
+
+
+## Related Work:
+
+#### **Related Work**
+
+The following resources are a sample of what inspired this project.
+
+1. "Here's how badly coronavirus has decimated the box office" *CNN*, October 14, 2020. [Link.](https://edition.cnn.com/2020/10/14/media/box-office-coronavirus/index.html)
+2. "Disney-owned theaters? Masks with your ticket? Moviegoing could look quite different post-pandemic" *USA TODAY*, January 16, 2020. [Link.](https://www.usatoday.com/story/entertainment/movies/2020/06/14/future-moviegoing-could-coronavirus-kill-movie-theaters/3186292001/)
+3. "Can there be a fairy-tale ending for Hollywood after COVID-19?" *WORLD ECONOMIC FORUM*, January 23, 2020. [Link.](https://www.weforum.org/agenda/2020/07/impact-coronavirus-covid-19-hollywood-global-film-industry-movie-theatres/)
+
+
+## Intial Questions:
+
+- What is the general trend of gross across time? Will this pattern vary for different genres?
+- What is the association between Gross and other variables including IMDB_score, facebook_likes?
+- Is director a significant predictor of Gross?
+- the crude relationship between number of reviews and Gross
+
+
+## Data
+
+### *Data Sources*
+
+* Primary data source: [Kaggle](https://www.kaggle.com/carolzhangdc/imdb-5000-movie-dataset) 
+* release ymd(year, month, date): [IMDb] (https://https://www.imdb.com/)
+
+&nbsp;
+
+### *Variables of interest*
+
+##### **Outcomes**
+
+
+##### **Candidate Predictors**
+
+
+&nbsp;
+
+### *Data Cleaning*
+
+
+
+
