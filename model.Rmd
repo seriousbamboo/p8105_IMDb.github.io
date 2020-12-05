@@ -310,14 +310,9 @@ Above presents the check of assumption after transformation. In general, Box-Cox
 
 * Lastly, we can still observe some outliers that are influential from the Residuals vs Leverage plot.
 
+## Findings
 
-
-
-## Discussion
-
-### Findings
-
-#### Regarding the Genre Model:
+### Regarding the Genre Model:
 
 * Overall, genres really really don't matter, as long as the movie has a popular genre. There is a great overlap between the popular genres and the important genres in our genre model, but the accuracy is weak.
 
@@ -328,7 +323,7 @@ Above presents the check of assumption after transformation. In general, Box-Cox
 The Genre model may not be referential that much since nowadays, a film usually contains elements from multiple genres and it will be getting harder to define one film's genre in the future. Still, the model provides some insights. After all, horror movie indeed keep some audiences (like me) away from the theater. 
 
 
-#### Regarding the non-Genre Model:
+### Regarding the non-Genre Model:
 
 Overall, non-genre model can provide much more insights than the genre only model since it is more accurate. However, the coefficients are really surprising. 
 
@@ -338,7 +333,7 @@ Overall, non-genre model can provide much more insights than the genre only mode
 
 * Lastly, and ironically, IMDB scores negatively influence the gross dramatically. Why is? We believe that there exists an inconsistency between score and the gross, since none of the score related factors provides a strong and positive effect on gross. Such inconsistency may because only limited people actually score the movie.
 
-### Limitation
+## Limitation
 
 Even though we performed Box-Cox transformation to make our non-genre model better satisfy the assumptions for regression, the model still didn't satisfy the assumptions well. It may implies a complicated model should be utilized, like machine learning algorithms. In addition to the method selection, the data should contain more features, like inflation rate, to provide more insights in model building. 
 

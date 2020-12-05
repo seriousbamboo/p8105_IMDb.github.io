@@ -293,6 +293,9 @@ $(document).ready(function () {
   <a href="about.html">About page</a>
 </li>
 <li>
+  <a href="model.html">Model</a>
+</li>
+<li>
   <a href="final_report.html">Report</a>
 </li>
 <li>
@@ -532,12 +535,10 @@ Figure 12-15. Plots to Check the Assumptions after Transformation
 </ul>
 </div>
 </div>
-<div id="discussion" class="section level2">
-<h2>Discussion</h2>
-<div id="findings" class="section level3">
-<h3>Findings</h3>
-<div id="regarding-the-genre-model" class="section level4">
-<h4>Regarding the Genre Model:</h4>
+<div id="findings" class="section level2">
+<h2>Findings</h2>
+<div id="regarding-the-genre-model" class="section level3">
+<h3>Regarding the Genre Model:</h3>
 <ul>
 <li><p>Overall, genres really really don’t matter, as long as the movie has a popular genre. There is a great overlap between the popular genres and the important genres in our genre model, but the accuracy is weak.</p></li>
 <li><p>From the genre model, action, adventure and family are the top three genres that can ignite the gross. We propose that the main audiences of movie theater are young people who are interested in visual effects or special effects. Surprisingly, family movie is another guarantee of the gross since family movies have a broader audiences. After all, watching movie together has became a family event for a long time.</p></li>
@@ -545,8 +546,8 @@ Figure 12-15. Plots to Check the Assumptions after Transformation
 </ul>
 <p>The Genre model may not be referential that much since nowadays, a film usually contains elements from multiple genres and it will be getting harder to define one film’s genre in the future. Still, the model provides some insights. After all, horror movie indeed keep some audiences (like me) away from the theater.</p>
 </div>
-<div id="regarding-the-non-genre-model" class="section level4">
-<h4>Regarding the non-Genre Model:</h4>
+<div id="regarding-the-non-genre-model" class="section level3">
+<h3>Regarding the non-Genre Model:</h3>
 <p>Overall, non-genre model can provide much more insights than the genre only model since it is more accurate. However, the coefficients are really surprising.</p>
 <ul>
 <li><p>The most influential factor that positively influence the gross is the number of genres. In other words, the more genres (or more elements) are included in the movie, the more successful of the movie will be. It provides an interesting insight that the majority of audiences is much more interested in the film itself, rather than the stars or the production. Telling a good story is vitally important.</p></li>
@@ -555,10 +556,9 @@ Figure 12-15. Plots to Check the Assumptions after Transformation
 </ul>
 </div>
 </div>
-<div id="limitation" class="section level3">
-<h3>Limitation</h3>
+<div id="limitation" class="section level2">
+<h2>Limitation</h2>
 <p>Even though we performed Box-Cox transformation to make our non-genre model better satisfy the assumptions for regression, the model still didn’t satisfy the assumptions well. It may implies a complicated model should be utilized, like machine learning algorithms. In addition to the method selection, the data should contain more features, like inflation rate, to provide more insights in model building.</p>
-</div>
 </div>
 
 

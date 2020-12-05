@@ -22,8 +22,19 @@
 <script src="site_libs/navigation-1.1/tabsets.js"></script>
 <link href="site_libs/highlightjs-9.12.0/default.css" rel="stylesheet" />
 <script src="site_libs/highlightjs-9.12.0/highlight.js"></script>
+<link href="site_libs/anchor-sections-1.0/anchor-sections.css" rel="stylesheet" />
+<script src="site_libs/anchor-sections-1.0/anchor-sections.js"></script>
 <link href="site_libs/font-awesome-5.1.0/css/all.css" rel="stylesheet" />
 <link href="site_libs/font-awesome-5.1.0/css/v4-shims.css" rel="stylesheet" />
+
+<style type="text/css">
+  code{white-space: pre-wrap;}
+  span.smallcaps{font-variant: small-caps;}
+  span.underline{text-decoration: underline;}
+  div.column{display: inline-block; vertical-align: top; width: 50%;}
+  div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+  ul.task-list{list-style: none;}
+    </style>
 
 <style type="text/css">code{white-space: pre;}</style>
 <style type="text/css">
@@ -280,6 +291,9 @@ $(document).ready(function () {
   <a href="about.html">About page</a>
 </li>
 <li>
+  <a href="model.html">Model</a>
+</li>
+<li>
   <a href="final_report.html">Report</a>
 </li>
 <li>
@@ -501,6 +515,245 @@ $(document).ready(function () {
 </ul>
 </div>
 </div>
+<div id="formal-analysis" class="section level2">
+<h2>Formal Analysis</h2>
+<div id="overview" class="section level3">
+<h3>Overview</h3>
+<p>We aimed to investigating factors that associated with the gross and how these factors influenced the gross. We hoped to construct a robust model that may potentially guide film industry investors to make wise decisions after the pandemic.</p>
+<p>After correlation matrices, genres in general didn’t have strong associations with the gross but disturbed the effect of other predictors (not shown). Thus, we decided to build single linear regression models with stratification of genres and presented in form of <a href="https://gou29.shinyapps.io/p8015_final_shinyapp/">interactive plot</a>.</p>
+<p>Since the exploratory analyses and SLR models didn’t provide much information, we decided to build the multiple linear regression model, from the full model, without a predetermined hypothesis. Meanwhile, in a situation of investing, genres are usually predetermined. Thus, we decided to build two models: model 1 contained predictors other than genres and model 2 contained genres only.</p>
+<p>We used a special stepwise regression method to find the best model. A general Stepwise regression is a “step by step” method to select predictors which have higher AIC scores. However, rather than comparing variables’ AIC, our method based on the comparison of each model’s accuracy and it will provide a better model than traditional AIC stepwise regression. Finally, we presented two final models in the end of the section and discussed some interesting discoveries based on our models.</p>
+</div>
+<div id="heatmap-plots-of-correlation" class="section level3">
+<h3>Heatmap Plots of Correlation</h3>
+<div id="heatmap-for-genres" class="section level4">
+<h4>Heatmap for Genres</h4>
+<p><img src="final_report_files/figure-html/unnamed-chunk-4-1.png" width="672" /></p>
+<pre><code>## # A tibble: 1 x 12
+##   ` `   Adventure Fantasy Animation Family Sport Documentary  News Action Sci.Fi
+##   &lt;fct&gt;     &lt;dbl&gt;   &lt;dbl&gt;     &lt;dbl&gt;  &lt;dbl&gt; &lt;dbl&gt;       &lt;dbl&gt; &lt;dbl&gt;  &lt;dbl&gt;  &lt;dbl&gt;
+## 1 gross      0.36    0.21      0.19   0.21 -0.02       -0.08 -0.01   0.23   0.18
+## # ... with 2 more variables: Mystery &lt;dbl&gt;, Horror &lt;dbl&gt;</code></pre>
+<p>Figure 1 presented the correlation matrix between various genres and gross. From the heatmap, we can intuitively observe associations between genres and gross. Overall, we didn’t observe any strong connections between genres and gross. Among all genres, adventure, fantasy, animation, family, action and science fiction have stronger associations with gross and they may contribute to the model later.</p>
+</div>
+<div id="heatmap-for-non-genre-factors" class="section level4">
+<h4>Heatmap for non-Genre Factors</h4>
+<p><img src="final_report_files/figure-html/unnamed-chunk-6-1.png" width="672" /></p>
+<pre><code>## # A tibble: 1 x 9
+##   ` `   num_voted_users num_user_for_re~ duration imdb_score budget aspect_ratio
+##   &lt;fct&gt;           &lt;dbl&gt;            &lt;dbl&gt;    &lt;dbl&gt;      &lt;dbl&gt;  &lt;dbl&gt;        &lt;dbl&gt;
+## 1 gross            0.63             0.55     0.25       0.21    0.1         0.07
+## # ... with 2 more variables: num_genres &lt;dbl&gt;, mult_genre &lt;dbl&gt;</code></pre>
+<p>Figure 2 presented the correlation matrix between other factors and gross. We observed a better and stronger associations. Among all predictors, number of voted users, number of users for reviews, duration, IMDB scores, budget and number of genres have stronger associations with gross and they might contribute to the model later.</p>
+</div>
+</div>
+<div id="stratified-single-linear-regression-model" class="section level3">
+<h3>Stratified Single Linear Regression Model</h3>
+<p>From the heatmap, we observed a generally weak association between genres and gross. Therefore, we decided to perform single linear regression between gross and each predictor to discover possible significant predictors. Detailed plots and model summaries were located <a href="https://gou29.shinyapps.io/p8015_final_shinyapp/">HERE</a>. Interestingly, the majority of single linear regression models was significant. Thus, unfortunately, it didn’t provide much information regarding the building of our final models and we decided build the model from the full model.</p>
+</div>
+<div id="model-building" class="section level3">
+<h3>Model Building</h3>
+<p>We applied <code>regsubsets</code> from <code>leap</code> library to conduct the regression. Basically, this function constructs the null model first (contains only intercept) and combines various of variables to form an exhaustive subset of models. Within the subset, the function will compare the adjusted R2 and find the best combination of predictors. It is a better method than stepwise selection but needs a longer calculation time. Also, since cross validation has been done within the function, we don’t need to perform the cross validation. Because we don’t have many features, we decided to utilize this method to select the best model.</p>
+<div id="model-without-genres" class="section level4">
+<h4>Model without Genres</h4>
+<p><img src="final_report_files/figure-html/unnamed-chunk-9-1.png" width="672" /> <img src="final_report_files/figure-html/unnamed-chunk-10-1.png" width="672" /></p>
+<p>Figure 3 showed how many variables should the best model included. In our case, including 8 variables will make our model reach the highest accuracy (highest adjusted R2).</p>
+<p>From Figure 4, we can conclude our model should include following variables: number of critics for reviews, Facebook likes of the director, Facebook likes of the primary actor/actress, number of voted users, total Facebook likes of the cast, number of users for reviews, IMDB score and the number of genres.</p>
+<div id="non-genre-model" class="section level5">
+<h5>non-Genre Model</h5>
+<table>
+<thead>
+<tr class="header">
+<th align="left">term</th>
+<th align="right">estimate</th>
+<th align="right">p.value</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">(Intercept)</td>
+<td align="right">23602061.777</td>
+<td align="right">0</td>
+</tr>
+<tr class="even">
+<td align="left">num_critic_for_reviews</td>
+<td align="right">59149.428</td>
+<td align="right">0</td>
+</tr>
+<tr class="odd">
+<td align="left">director_facebook_likes</td>
+<td align="right">-1146.178</td>
+<td align="right">0</td>
+</tr>
+<tr class="even">
+<td align="left">actor_1_facebook_likes</td>
+<td align="right">-1714.282</td>
+<td align="right">0</td>
+</tr>
+<tr class="odd">
+<td align="left">num_voted_users</td>
+<td align="right">229.287</td>
+<td align="right">0</td>
+</tr>
+<tr class="even">
+<td align="left">cast_total_facebook_likes</td>
+<td align="right">1617.668</td>
+<td align="right">0</td>
+</tr>
+<tr class="odd">
+<td align="left">num_user_for_reviews</td>
+<td align="right">18131.000</td>
+<td align="right">0</td>
+</tr>
+<tr class="even">
+<td align="left">imdb_score</td>
+<td align="right">-6249571.013</td>
+<td align="right">0</td>
+</tr>
+<tr class="odd">
+<td align="left">num_genres</td>
+<td align="right">8253052.829</td>
+<td align="right">0</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<div id="model-of-genres" class="section level4">
+<h4>Model of Genres</h4>
+<p><img src="final_report_files/figure-html/unnamed-chunk-14-1.png" width="672" /><img src="final_report_files/figure-html/unnamed-chunk-14-2.png" width="672" /></p>
+<p>Similarly, 8 variables should be included in our model according to Figure 5. From the Figure 6, we can conclude Action, Adventure, Fantasy, Sci-Fiction, Family, Drama, Horror and Documentary are important factors that influence the gross. However, since the accuracy (adjusted R2) is small, genre in general may not be an important factor to consider.</p>
+<div id="genre-model" class="section level5">
+<h5>Genre Model</h5>
+<table>
+<thead>
+<tr class="header">
+<th align="left">term</th>
+<th align="right">estimate</th>
+<th align="right">p.value</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">(Intercept)</td>
+<td align="right">40074841</td>
+<td align="right">0</td>
+</tr>
+<tr class="even">
+<td align="left">Action</td>
+<td align="right">15812139</td>
+<td align="right">0</td>
+</tr>
+<tr class="odd">
+<td align="left">Adventure</td>
+<td align="right">37374617</td>
+<td align="right">0</td>
+</tr>
+<tr class="even">
+<td align="left">Fantasy</td>
+<td align="right">20218164</td>
+<td align="right">0</td>
+</tr>
+<tr class="odd">
+<td align="left">Sci.Fi</td>
+<td align="right">16435725</td>
+<td align="right">0</td>
+</tr>
+<tr class="even">
+<td align="left">Family</td>
+<td align="right">17484363</td>
+<td align="right">0</td>
+</tr>
+<tr class="odd">
+<td align="left">Drama</td>
+<td align="right">-13173462</td>
+<td align="right">0</td>
+</tr>
+<tr class="even">
+<td align="left">Horror</td>
+<td align="right">-18033828</td>
+<td align="right">0</td>
+</tr>
+<tr class="odd">
+<td align="left">Documentary</td>
+<td align="right">-29120044</td>
+<td align="right">0</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+<div id="diagnosis" class="section level3">
+<h3>Diagnosis</h3>
+<div class="figure">
+<img src="final_report_files/figure-html/unnamed-chunk-17-1.png" alt="Figure 7-10. Plots to Check the Assumptions after Transformation" width="672" />
+<p class="caption">
+Figure 7-10. Plots to Check the Assumptions after Transformation
+</p>
+</div>
+<p>Above provides assumption checking of the non-genre model. Since the non-Genre Model has a much higher accuracy, we check the assumption of it. Unfortunately, plots are not satisfactory.</p>
+<ul>
+<li><p>A cluster of data locates mainly on the left and is not randomly distributed for the Residuals vs Fitted plot. However, other clear pattern is not observed, meaning that linear regression is still appropriate.</p></li>
+<li><p>Normal QQ plot provides insight of its normality and the majority of our model lied on the line, which is acceptable.</p></li>
+<li><p>For scale location plot, a cluster of data aggregates together showed the equal variance assumption was violated.</p></li>
+<li><p>Lastly, we can observe some outliers that are influential from the Residuals vs Leverage plot.</p></li>
+</ul>
+<p>Since nearly all the assumptions were violated in some extent, we decided to perform a box-cox transformation.</p>
+<div id="box-cox-transformation" class="section level4">
+<h4>Box-Cox Transformation</h4>
+<p>Box-Cox transformation is another common method to normalize the data. Detailed information is provided <a href="https://rss.onlinelibrary.wiley.com/doi/abs/10.1111/j.2517-6161.1964.tb00553.x">here</a>. We performed Box-Cox transformation to our non-Genre model and check the assumptions again.</p>
+<div class="figure">
+<img src="final_report_files/figure-html/unnamed-chunk-18-1.png" alt="Figure 11. Fitted Lambda for Box-Cox Transformation." width="672" />
+<p class="caption">
+Figure 11. Fitted Lambda for Box-Cox Transformation.
+</p>
+</div>
+<p>Above provides the fitted lambda for the transformation and we transformed our model based on this lambda, which was 0.303.</p>
+</div>
+<div id="assumption-checking-after-transformation" class="section level4">
+<h4>Assumption Checking after Transformation</h4>
+<div class="figure">
+<img src="final_report_files/figure-html/unnamed-chunk-19-1.png" alt="Figure 12-15. Plots to Check the Assumptions after Transformation" width="672" />
+<p class="caption">
+Figure 12-15. Plots to Check the Assumptions after Transformation
+</p>
+</div>
+<p>Above presents the check of assumption after transformation. In general, Box-Cox transformation provided a quite satisfactory transformation to our model.</p>
+<ul>
+<li><p>A cluster of data still exists on the left and is more randomly distributed compared the plot before transformation.However, a long “tail” on the right suggests a strong influence of outliers.</p></li>
+<li><p>Transformed model lies on the line perfectly.</p></li>
+<li><p>For scale location plot, a cluster of data aggregates together but the trend line is more horizontal than the previous scale location plot, showing that the homoskedasticity (equal spread of the data) is checked for the majority of the data.</p></li>
+<li><p>Lastly, we can still observe some outliers that are influential from the Residuals vs Leverage plot.</p></li>
+</ul>
+</div>
+</div>
+<div id="limitation" class="section level3">
+<h3>Limitation</h3>
+<p>Even though we performed Box-Cox transformation to make our non-genre model better satisfy the assumptions for regression, the model still didn’t satisfy the assumptions well. It may implies a complicated model should be utilized, like machine learning algorithms. In addition to the method selection, the data should contain more features, like inflation rate, to provide more insights in model building. ## Discussion</p>
+</div>
+<div id="findings" class="section level3">
+<h3>Findings</h3>
+<div id="regarding-the-genre-model" class="section level4">
+<h4>Regarding the Genre Model:</h4>
+<ul>
+<li><p>Overall, genres really really don’t matter, as long as the movie has a popular genre. There is a great overlap between the popular genres and the important genres in our genre model, but the accuracy is weak.</p></li>
+<li><p>From the genre model, action, adventure and family are the top three genres that can ignite the gross. We propose that the main audiences of movie theater are young people who are interested in visual effects or special effects. Surprisingly, family movie is another guarantee of the gross since family movies have a broader audiences. After all, watching movie together has became a family event for a long time.</p></li>
+<li><p>Horror, documentary and drama have the negative effect on gross. We suppose the reason that genres with a limited scope of audiences will negatively affect on gross. These three genres usually keep audiences from entering the theater. (PS: I personally have never watched these three genres of movies in a movie theater.)</p></li>
+</ul>
+<p>The Genre model may not be referential that much since nowadays, a film usually contains elements from multiple genres and it will be getting harder to define one film’s genre in the future. Still, the model provides some insights. After all, horror movie indeed keep some audiences (like me) away from the theater.</p>
+</div>
+<div id="regarding-the-non-genre-model" class="section level4">
+<h4>Regarding the non-Genre Model:</h4>
+<p>Overall, non-genre model can provide much more insights than the genre only model since it is more accurate. However, the coefficients are really surprising.</p>
+<ul>
+<li><p>The most influential factor that positively influence the gross is the number of genres. In other words, the more genres (or more elements) are included in the movie, the more successful of the movie will be. It provides an interesting insight that the majority of audiences is much more interested in the film itself, rather than the stars or the production. Telling a good story is vitally important.</p></li>
+<li><p>Other than the number of genres, factors that positively influence, with a great magnitude, the gross are number of critic for reviews and number of users for reviews. These two factors, to a large extend, represent the popularity of a movie and emphasizing the power of marketing. Marketing, in any industries, is nowadays an essential factor on determining the sales, especially with the fast growing of social media. However, since our data was collected from IMDB and either the number of critics and the number of users was cumulative, marketing of a successful movie should be a long term efforts.</p></li>
+<li><p>Lastly, and ironically, IMDB scores negatively influence the gross dramatically. Why is? We believe that there exists an inconsistency between score and the gross, since none of the score related factors provides a strong and positive effect on gross. Such inconsistency may because only limited people actually score the movie.</p></li>
+</ul>
+</div>
+</div>
+</div>
 
 
 
@@ -511,7 +764,7 @@ $(document).ready(function () {
 
 // add bootstrap table styles to pandoc tables
 function bootstrapStylePandocTables() {
-  $('tr.header').parent('thead').parent('table').addClass('table table-condensed');
+  $('tr.odd').parent('tbody').parent('table').addClass('table table-condensed');
 }
 $(document).ready(function () {
   bootstrapStylePandocTables();
