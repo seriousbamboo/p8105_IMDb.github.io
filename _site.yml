@@ -5,10 +5,10 @@ navbar:
   right:
     - text: "About page"
       href: about.html
-    - text: "Plots"
-      href: plotly.html
-    - icon: fa-envelope fa-lg
-      href: mailto:dummy@cumc.columbia.edu
+    - text: "Report"
+      href: final_report.html
+    - icon: fa-chart-bar fa-lg
+      href: https://gou29.shinyapps.io/p8015_final_shinyapp/
     - icon: fa-github fa-lg
       href: https://github.com/seriousbamboo/p8105_IMDb.github.io
 output:
