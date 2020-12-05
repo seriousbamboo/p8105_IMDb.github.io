@@ -33,12 +33,10 @@ output:
 
 ###### Image: AMERICAN-STATESMAN/JAY JANNER
 
-"0"
 
 # Screencast Introduction
 
-<iframe width="560" height="315" src="https://www.youtube.com/watch?v=VCCX5mHf7_8" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
-
+[Click link here](https://www.youtube.com/watch?v=VCCX5mHf7_8)
 
 # Introduction
 
