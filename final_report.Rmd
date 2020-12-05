@@ -52,14 +52,46 @@ The following resources are a sample of what inspired this project.
 
 ##### **Outcomes**
 
+- `gross`: total gross for the movies
 
 ##### **Candidate Predictors**
+
+Variable name             | Data type | Variable explanation
+--------------------------|-----------|---------------
+`director_name`           |chr        |Name of the Director of the movie
+`director_facebook_likes` |dbl        |Number of likes of the director on his/her Facebook Page
+`actor_1_name`            |chr        |Primary actor starring in the movie
+`actor_1_facebook_likes`  |dbl        |Number of likes of the Actor_1 on his/her Facebook Page
+`cast_total_facebook_likes`|dbl       |Number of likes of the total casts on his/her Facebook Page
+`movie_facebook_likes`    |dbl        |Number of likes of the movie on its Facebook Page
+`duration`                |dbl        |Length for the movie
+`genres`                  |chr|Total genres for the movie
+`movie_title`             |chr|The title for the movie
+`num_critic_for_reviews`  |dbl        |Number of the critic reviews for the movie
+`num_voted_users`         |dbl        |Number of users who review for the movie
+`num_user_for_reviews`    |dbl        |Number of users reviews for the movie
+`language`|chr|Main language for the movie
+`country`|chr|Country for the movie
+`budget`|dbl|Total budget for the movie
+`title_year`|dbl|Release year for the movie
+`imdb_score`|dbl|Overall score for the movie on IMDB
+`aspect_ratio`|dbl|Aspect ratio for the movie
 
 
 &nbsp;
 
 ### *Data Cleaning*
 
+- keep only interested variables 
+- Manipulate `genres` column
+  - input example: "avatar|future|marine|native|paraplegic"
+  - For model: separate genres into multiple columns with 0 and 1
+    - find all the genres: `unique`, `unlist`, and `str_split`
+    - create a blank dataframe with all 0s
+      - columns number is equal to raw dataset
+      - row number is equal to genres types
+    - test for all the movies, if it has the certain genres, change the corresponding number from 0 to 1
+  - For shiny: pivot longer
 
 
 

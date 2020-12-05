@@ -22,19 +22,8 @@
 <script src="site_libs/navigation-1.1/tabsets.js"></script>
 <link href="site_libs/highlightjs-9.12.0/default.css" rel="stylesheet" />
 <script src="site_libs/highlightjs-9.12.0/highlight.js"></script>
-<link href="site_libs/anchor-sections-1.0/anchor-sections.css" rel="stylesheet" />
-<script src="site_libs/anchor-sections-1.0/anchor-sections.js"></script>
 <link href="site_libs/font-awesome-5.1.0/css/all.css" rel="stylesheet" />
 <link href="site_libs/font-awesome-5.1.0/css/v4-shims.css" rel="stylesheet" />
-
-<style type="text/css">
-  code{white-space: pre-wrap;}
-  span.smallcaps{font-variant: small-caps;}
-  span.underline{text-decoration: underline;}
-  div.column{display: inline-block; vertical-align: top; width: 50%;}
-  div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
-  ul.task-list{list-style: none;}
-    </style>
 
 <style type="text/css">code{white-space: pre;}</style>
 <style type="text/css">
@@ -364,14 +353,141 @@ $(document).ready(function () {
 <h3><em>Variables of interest</em></h3>
 <div id="outcomes" class="section level5">
 <h5><strong>Outcomes</strong></h5>
+<ul>
+<li><code>gross</code>: total gross for the movies</li>
+</ul>
 </div>
 <div id="candidate-predictors" class="section level5">
 <h5><strong>Candidate Predictors</strong></h5>
+<table>
+<colgroup>
+<col width="50%" />
+<col width="21%" />
+<col width="28%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>Variable name</th>
+<th>Data type</th>
+<th>Variable explanation</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>director_name</code></td>
+<td>chr</td>
+<td>Name of the Director of the movie</td>
+</tr>
+<tr class="even">
+<td><code>director_facebook_likes</code></td>
+<td>dbl</td>
+<td>Number of likes of the director on his/her Facebook Page</td>
+</tr>
+<tr class="odd">
+<td><code>actor_1_name</code></td>
+<td>chr</td>
+<td>Primary actor starring in the movie</td>
+</tr>
+<tr class="even">
+<td><code>actor_1_facebook_likes</code></td>
+<td>dbl</td>
+<td>Number of likes of the Actor_1 on his/her Facebook Page</td>
+</tr>
+<tr class="odd">
+<td><code>cast_total_facebook_likes</code></td>
+<td>dbl</td>
+<td>Number of likes of the total casts on his/her Facebook Page</td>
+</tr>
+<tr class="even">
+<td><code>movie_facebook_likes</code></td>
+<td>dbl</td>
+<td>Number of likes of the movie on its Facebook Page</td>
+</tr>
+<tr class="odd">
+<td><code>duration</code></td>
+<td>dbl</td>
+<td>Length for the movie</td>
+</tr>
+<tr class="even">
+<td><code>genres</code></td>
+<td>chr</td>
+<td>Total genres for the movie</td>
+</tr>
+<tr class="odd">
+<td><code>movie_title</code></td>
+<td>chr</td>
+<td>The title for the movie</td>
+</tr>
+<tr class="even">
+<td><code>num_critic_for_reviews</code></td>
+<td>dbl</td>
+<td>Number of the critic reviews for the movie</td>
+</tr>
+<tr class="odd">
+<td><code>num_voted_users</code></td>
+<td>dbl</td>
+<td>Number of users who review for the movie</td>
+</tr>
+<tr class="even">
+<td><code>num_user_for_reviews</code></td>
+<td>dbl</td>
+<td>Number of users reviews for the movie</td>
+</tr>
+<tr class="odd">
+<td><code>language</code></td>
+<td>chr</td>
+<td>Main language for the movie</td>
+</tr>
+<tr class="even">
+<td><code>country</code></td>
+<td>chr</td>
+<td>Country for the movie</td>
+</tr>
+<tr class="odd">
+<td><code>budget</code></td>
+<td>dbl</td>
+<td>Total budget for the movie</td>
+</tr>
+<tr class="even">
+<td><code>title_year</code></td>
+<td>dbl</td>
+<td>Release year for the movie</td>
+</tr>
+<tr class="odd">
+<td><code>imdb_score</code></td>
+<td>dbl</td>
+<td>Overall score for the movie on IMDB</td>
+</tr>
+<tr class="even">
+<td><code>aspect_ratio</code></td>
+<td>dbl</td>
+<td>Aspect ratio for the movie</td>
+</tr>
+</tbody>
+</table>
 <p> </p>
 </div>
 </div>
 <div id="data-cleaning" class="section level3">
 <h3><em>Data Cleaning</em></h3>
+<ul>
+<li>keep only interested variables</li>
+<li>Manipulate <code>genres</code> column
+<ul>
+<li>input example: “avatar|future|marine|native|paraplegic”</li>
+<li>For model: separate genres into multiple columns with 0 and 1
+<ul>
+<li>find all the genres: <code>unique</code>, <code>unlist</code>, and <code>str_split</code></li>
+<li>create a blank dataframe with all 0s
+<ul>
+<li>columns number is equal to raw dataset</li>
+<li>row number is equal to genres types</li>
+</ul></li>
+<li>test for all the movies, if it has the certain genres, change the corresponding number from 0 to 1</li>
+</ul></li>
+<li>For shiny: pivot longer</li>
+</ul></li>
+</ul>
 </div>
 </div>
 
@@ -384,7 +500,7 @@ $(document).ready(function () {
 
 // add bootstrap table styles to pandoc tables
 function bootstrapStylePandocTables() {
-  $('tr.odd').parent('tbody').parent('table').addClass('table table-condensed');
+  $('tr.header').parent('thead').parent('table').addClass('table table-condensed');
 }
 $(document).ready(function () {
   bootstrapStylePandocTables();
